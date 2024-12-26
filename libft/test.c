@@ -1,8 +1,102 @@
 #include "libft.h"
 #include <stdio.h>
+#include <ctype.h>
 
 int	main()
 {
+	// isalpha
+	printf("Is alpha ? (yes) = :  %d\n", ft_isalpha('c'));
+	printf("Is alpha ? (no) = :  %d\n", ft_isalpha(' '));
+	// isdigit
+	printf("Is digit ? (yes) = :  %d\n", ft_isdigit('5'));
+	printf("Is digit ? (no) = :  %d\n", ft_isdigit(' '));
+	// isalphanum
+	printf("Is alphanum ? (yes) = :  %d\n", ft_isalnum('a'));
+	printf("Is alphanum ? (no) = :  %d\n", ft_isalnum(' '));
+	// isascii
+	printf("Is isascii ? (yes) = :  %d\n", ft_isascii('a'));
+	printf("Is isascii ? (no) = :  %d\n", ft_isascii(220));
+	// isprint
+	printf("Is isprint ? (yes) = :  %d\n", ft_isprint('a'));
+	printf("Is isprint ? (no) = :  %d\n", ft_isprint(220));
+	// strlen
+	printf("String length =  %ld\n", ft_strlen("asdsad"));
+	printf("String length (no input) = :  %ld\n", ft_strlen(NULL));
+	// memset
+	printf("String to memset =  %s\n", "aaaaa");
+	char memset_buffer[] = "aaaaa";
+	printf("String out of memset =  %s\n", (char *)ft_memset(memset_buffer, 'c', 2*sizeof(char)));
+	// bzero '\0'
+	printf("String to bzero =  %s\n", "aaaaa");
+	char bzero_buffer[] = "aaaaa";
+	ft_bzero(bzero_buffer, 5*sizeof(char));
+	printf("String out of bzero =  %s\n", bzero_buffer );
+	// memcpy
+	char buffer1[20] = "Hello, world!";
+	char buffer2[20];
+
+	// Test forward copy
+	ft_memcpy(buffer2, buffer1, 14);
+	printf("memcpy Buffer2 (forward): %s\n", buffer2);
+	// Test overlap case
+	ft_memcpy(buffer1 + 3, buffer1, 6);
+	printf("memcpy Buffer1 (overlap): %s\n", buffer1);
+	ft_strlcpy(buffer1, "Hello, world!", 14);
+	// Test forward copy
+	ft_memmove(buffer2, buffer1, 14);
+	printf("memmove Buffer2 (forward): %s\n", buffer2);
+	// Test overlap case
+	ft_memmove(buffer1 + 3, buffer1, 6);
+	printf("memmove Buffer1 (overlap): %s\n", buffer1);
+	// strlcat
+	char dest1[20] = "Hello, ";
+	const char *src1 = "world!";
+	size_t result1 = ft_strlcat(dest1, src1, sizeof(dest1));
+	printf("strlcat result: %s\n", dest1);
+	// no test for toupper
+	// no test for tolower
+	// strchr
+	char str[] = "Hello, world!";
+	char *result = ft_strchr(str, 'o');
+	printf("String starting at strchr result: %s\n", result);
+	// strrchr
+	char str2[] = "Hello, world!";
+	char *result2 = ft_strrchr(str2, 'o');
+	printf("String starting at strrchr result: %s\n", result2);
+	// strncmp
+	const char *s1 = "HelloWorld";
+    const char *s2 = "HelloEarth";
+    printf("difference of two strings: %d\n", ft_strncmp(s1, s2, 7));
+	// memchr
+	char buffer3[] = "Hello, world!";
+    char *result3 = ft_memchr(buffer3, 'o', 13);
+    if (result3)
+        printf("Found: %c at position %ld\n", *result3, result3 - buffer3);
+    else
+        printf("Not Found\n");
+	// memcmp
+	char str5[] = "abcdef";
+	char str6[] = "abcdeg";
+	int result6 = ft_memcmp(str5, str6, 6);
+	printf("Test 4 (comparison): %d\n", result6);
+	// strnstr
+	printf("%s\n", ft_strnstr("hello", "ell", 5));          // Should return "hello"
+	// atoi
+	printf("atoi out = %d\n", ft_atoi(" -12345abc"));
+	// calloc
+	int *arr = (int *)ft_calloc(5, sizeof(int));
+	if	(!arr) {
+		printf("Memory allocation failed\n");
+		return 1;
+	}
+	// Verify if all elements are initialized to 0
+	for (int i = 0; i < 5; i++) {
+		printf("arr[%d] = %d\n", i, arr[i]);  // Should print 0 for all
+	}
+	free(arr);
+	// strdup
+	printf("strdup out = %s\n", ft_strdup("- hello 123"));
+	//          BONUS PART
 	t_list	*node1;
 	t_list	*node2;
 	t_list	*node3;
