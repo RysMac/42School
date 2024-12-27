@@ -1,6 +1,27 @@
 #include "libft.h"
 #include <stdio.h>
 #include <ctype.h>
+#include <limits.h>
+#include <fcntl.h>
+
+
+char	upper_function(unsigned int index, char c)
+{
+    if (index % 2 == 0) {
+        if (c >= 'a' && c <= 'z')
+            return c - 32; // Convert to uppercase
+    } else {
+        if (c >= 'A' && c <= 'Z')
+            return c + 32; // Convert to lowercase
+    }
+    return c; // If no transformation is needed, return the character as-is
+}
+
+void    upper_function2(unsigned int i, char *c) {
+    if (i % 2 == 0 && *c >= 'a' && *c <= 'z') {
+        *c = *c - 32; // Convert lowercase letters to uppercase at even indices
+    }
+}
 
 int	main()
 {
@@ -53,6 +74,7 @@ int	main()
 	const char *src1 = "world!";
 	size_t result1 = ft_strlcat(dest1, src1, sizeof(dest1));
 	printf("strlcat result: %s\n", dest1);
+	printf("strlcat result: %ld\n", result1);
 	// no test for toupper
 	// no test for tolower
 	// strchr
@@ -69,11 +91,11 @@ int	main()
     printf("difference of two strings: %d\n", ft_strncmp(s1, s2, 7));
 	// memchr
 	char buffer3[] = "Hello, world!";
-    char *result3 = ft_memchr(buffer3, 'o', 13);
-    if (result3)
-        printf("Found: %c at position %ld\n", *result3, result3 - buffer3);
-    else
-        printf("Not Found\n");
+	char *result3 = ft_memchr(buffer3, 'o', 13);
+	if (result3)
+		printf("Found: %c at position %ld\n", *result3, result3 - buffer3);
+	else
+		printf("Not Found\n");
 	// memcmp
 	char str5[] = "abcdef";
 	char str6[] = "abcdeg";
@@ -96,6 +118,51 @@ int	main()
 	free(arr);
 	// strdup
 	printf("strdup out = %s\n", ft_strdup("- hello 123"));
+	////////////////////////////////////////////////////////////////////////////////////////////
+	// Part II
+	// substr
+	printf("substring output = %s\n", ft_substr("- hello 123", 3, 4));
+	// strjoin
+	printf("str join output = %s\n", ft_strjoin("1235", "8756"));
+	// strtrim
+	printf("strtrim output = %s\n", ft_strtrim("! rdsg gfd ghello world !", "! d l r"));
+	// split
+	char **pointer_of_pointers = ft_split(",, !,rdsg, gfd ghello world,, !v", 'g');
+    for (int i = 0; i < 4; i++)
+    {
+        printf("split output = %s\n", pointer_of_pointers[i]);
+    }
+	// itoa
+	printf("itoa output int to char nr = %s\n", ft_itoa(-1550));
+    printf("itoa output int to char nr = %s\n", ft_itoa(INT_MIN));
+	// strmapi
+	printf("strmapi with upper function output = %s\n", ft_strmapi("abcdefFFFF0183,.sd", upper_function));
+	// striteri
+	char str_to_func[] = "abcdefFFFF0183";
+	ft_striteri(str_to_func, upper_function2);
+	printf("striteri output = %s\n", str_to_func);
+	//
+	ft_putchar_fd('A', 1);
+	ft_putchar_fd('\n', 1);
+	ft_putchar_fd('B', 2);
+	ft_putchar_fd('\n', 1);
+
+	int fdc = open("output_c.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644); // Open file for writing
+	if (fdc == -1) {
+		return 1; // Error handling
+	}
+	ft_putchar_fd('C', fdc); // Writes 'C' to the file "output.txt"
+	close(fdc);
+
+	int fdstr = open("output_str.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644); // Open file for writing
+	if (fdc == -1) {
+		return 1; // Error handling
+	}
+	ft_putstr_fd("hnsuai", fdstr);
+	ft_putendl_fd("  putendl with new line", fdstr);
+	ft_putnbr_fd(INT_MIN, fdstr);
+	close(fdstr);
+	ft_putendl_fd("putendl with new line", 1);
 	//          BONUS PART
 	t_list	*node1;
 	t_list	*node2;
@@ -138,14 +205,6 @@ int	main()
 	printf("lstsize function out 2 = %d\n", ft_lstsize(node1));
 
 	printf("last node = %s\n", (char *)ft_lstlast(node1)->content);
-
-	char *str_arr[] = {"a1b1c1","a2b2c2"};
-	char c[] = "aaa";
-	char *ptr = (char *)c;
-
-	ft_putchar_fd(*str_arr, 1);
-
-	printf("\narray = %s\n", *str_arr);
 
 	char tochange[] = "aaa";
 	char *head = "bbb";
