@@ -1,2 +1,5 @@
 *.o
 *.pdf
+*.txt
+libft_tester1/
+libft_tester2/

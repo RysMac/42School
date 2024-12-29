@@ -45,7 +45,7 @@ char	**ft_split(char const *s, char c)
 			word_count++;
 		i++;
 	}
-	printf("words = %ld\n", word_count);
+	//printf("words = %ld\n", word_count);
 	ptr = (char **)ft_calloc(word_count + 1, sizeof(char *));
 	if (!ptr)
 		return (NULL);
@@ -59,7 +59,7 @@ char	**ft_split(char const *s, char c)
 			start = i;
 			while (s[i] != c && s[i])
 				i++;
-			printf("word length = %ld\n", i - start);
+			//printf("word length = %ld\n", i - start);
 			ptr[w] = (char *)ft_calloc(i - start + 1, sizeof(char *));
 			if (!ptr[w])
 				return (NULL);

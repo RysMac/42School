@@ -20,8 +20,6 @@ function fills the first n bytes of the memory area pointed to by s with the con
 	size_t	i;
 	unsigned char	*ptr;
 
-	if (!s)
-		return (NULL);
 	ptr = (unsigned char *)s;
 	i = 0;
 	while (i < n)

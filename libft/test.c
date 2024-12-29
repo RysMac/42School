@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <string.h>
 
 
 char	upper_function(unsigned int index, char c)
@@ -42,7 +43,7 @@ int	main()
 	printf("Is isprint ? (no) = :  %d\n", ft_isprint(220));
 	// strlen
 	printf("String length =  %ld\n", ft_strlen("asdsad"));
-	printf("String length (no input) = :  %ld\n", ft_strlen(NULL));
+	//printf("String length (no input) = :  %ld\n", ft_strlen(NULL));
 	// memset
 	printf("String to memset =  %s\n", "aaaaa");
 	char memset_buffer[] = "aaaaa";
@@ -72,7 +73,7 @@ int	main()
 	// strlcat
 	char dest1[20] = "Hello, ";
 	const char *src1 = "world!";
-	size_t result1 = ft_strlcat(dest1, src1, sizeof(dest1));
+	size_t result1 = ft_strlcat(dest1, src1, 0);
 	printf("strlcat result: %s\n", dest1);
 	printf("strlcat result: %ld\n", result1);
 	// no test for toupper
@@ -86,9 +87,9 @@ int	main()
 	char *result2 = ft_strrchr(str2, 'o');
 	printf("String starting at strrchr result: %s\n", result2);
 	// strncmp
-	const char *s1 = "HelloWorld";
-    const char *s2 = "HelloEarth";
-    printf("difference of two strings: %d\n", ft_strncmp(s1, s2, 7));
+	const char *s1 = "abcdef";
+    const char *s2 = "abcdefghijklmnop";
+    printf("difference of two strings: %d\n", ft_strncmp(s1, s2, 6));
 	// memchr
 	char buffer3[] = "Hello, world!";
 	char *result3 = ft_memchr(buffer3, 'o', 13);

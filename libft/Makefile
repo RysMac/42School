@@ -47,3 +47,6 @@ re: fclean all
 test: $(NAME) $(TEST_FILE)
 	$(CC) $(CFLAGS) -o $(TEST_EXEC) $(TEST_FILE) $(NAME)
 	./$(TEST_EXEC)
+so:
+	$(CC) -nostartfiles -fPIC $(CFLAGS) $(SRC) $(BONUS_SRC)
+	gcc -nostartfiles -shared -o libft.so $(OBJ) $(BONUS_OBJ)
