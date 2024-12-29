@@ -107,14 +107,14 @@ int	main()
 	// atoi
 	printf("atoi out = %d\n", ft_atoi(" -12345abc"));
 	// calloc
-	int *arr = (int *)ft_calloc(5, sizeof(int));
+	int *arr = (int *)ft_calloc(0, -5);
 	if	(!arr) {
 		printf("Memory allocation failed\n");
 		return 1;
 	}
 	// Verify if all elements are initialized to 0
 	for (int i = 0; i < 5; i++) {
-		printf("arr[%d] = %d\n", i, arr[i]);  // Should print 0 for all
+		printf("print after calloc arr[%d] = %d\n", i, arr[i]);  // Should print 0 for all
 	}
 	free(arr);
 	// strdup
