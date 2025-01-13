@@ -1,8 +1,11 @@
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-#include "unistd.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
 
-void	get_next_line(char c);
+char	*get_next_line(int fd);
+size_t	line_counts(char *buffer);
 
 #endif

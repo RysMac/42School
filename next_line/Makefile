@@ -1,8 +1,8 @@
 #Variables
 CC = gcc
-CFLAGS = -Wall -Werror -Wextra
+CFLAGS = #-Wall -Werror -Wextra
 
-SRC = get_next_line.c
+SRC = get_next_line_utils.c get_next_line.c
 OBJ = $(SRC:.c=.o)
 
 TEST_FILE = my_test.c
