@@ -6,7 +6,7 @@
 /*   By: mr <mr@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 23:10:13 by mr                #+#    #+#             */
-/*   Updated: 2025/01/13 14:38:59 by mr               ###   ########.fr       */
+/*   Updated: 2025/02/10 15:04:09 by mr               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,42 +14,39 @@
 
 char	*get_next_line(int fd)
 {
-	int				i;
-	int				j;
-	static char		buffer[228];
-	char			buffer_tmp[228];
-	static	size_t 	buffer_pos = 0;
-	static ssize_t	bytes_in_buffer = 0;
-	char			*line;
+	char		*line; // whole line must be returned so no need to be static
+	static char	*temp; // part of the text which left from buffer
+	char		buffer[BUFFER_SIZE + 1];
+	ssize_t		bytes_read;
+	size_t		position;
 
-	if (bytes_in_buffer == 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	line = NULL;
+	if (temp)
 	{
-		printf("%s\n", "reading fd");
-		bytes_in_buffer = read(fd, buffer, sizeof(buffer));
+		line = ft_strdup(temp, 0, ft_strlen(temp));
+		free(temp);
+		temp = NULL;
 	}
-
-	i = 0;
-	while (buffer_pos < bytes_in_buffer)
+	while (1)
 	{
-		buffer_tmp[i] = buffer[buffer_pos];
-		buffer_pos++;
-		i++;
-		if (buffer[buffer_pos] == '\n')
-			break;
-		if (buffer_pos == bytes_in_buffer)
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read < 0)
 		{
-			bytes_in_buffer = read(fd, buffer, sizeof(buffer));
-			buffer_pos = 0;
+			free(line);
+			return (NULL);
 		}
+		if (bytes_read == 0)
+			break;
+		buffer[bytes_read] = '\0';
+		line = ft_join_and_free(line, buffer);
 
-	}
-
-	line = (char *)malloc(sizeof(char) * (i + 1));
-	j = 0;
-	while (j < i)
-	{
-		line[j] = buffer_tmp[j];
-		j++;
+		if (ft_strlen_end_line(buffer, &position) == 1 || bytes_read == 0)
+		{
+			temp = ft_strdup(buffer, position, BUFFER_SIZE);
+			return (line);
+		}
 	}
 	return (line);
 }
