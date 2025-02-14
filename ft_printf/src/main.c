@@ -1,7 +1,13 @@
 #include "utils.h"
-
+#include <limits.h>
 int	main()
 {
+
+	int c1 = ft_printf("%c %s \n %s %d %x \n", 'c', "string1", "string2", INT_MIN, -123456);
+	printf("%d\n", c1);
+
+	int c2 = printf("%c %s \n %s %d %x \n", 'c', "string1", "string2", INT_MIN, -123456);
+	printf("%d\n", c2);
 
 	int x = 42;
     int *ptr = &x;
@@ -18,8 +24,10 @@ int	main()
 
 	//ft_printf("%s after str1 %s %d %u \n", "string1", "string2", 0, -1235);
 
-	ft_printf("vdsf %u fds df %s fds fds er %s 12%% %x hjk %X %p %p \n", 12355 , "string1", "string2", -42, -42, address, (void *)ptr);
+	int printed0 = ft_printf("vdsf %u fds df %s fds fds er %s 12%% %d hjk %X %p %p \n", 12355 , "string1", "NULL", INT_MIN, -1, address, (void *)ptr);
+	printf("how many characters in my printf = %d \n", printed0);
 
-	printf("%c %s %s %x %X %p  \n", 'm', "string1", "string2", -42, -42, (void *)ptr);
+	int printed = printf("vdsf %u fds df %s fds fds er %s 12%% %d hjk %X %p %p \n", 12355 , "string1", "NULL", INT_MIN, -1, address, (void *)ptr);
+	printf("how many characters = %d \n", printed);
 	return (0);
 }
