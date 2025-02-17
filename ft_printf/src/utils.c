@@ -1,6 +1,6 @@
 // two simple function just for testing
 
-#include "utils.h"
+#include "ft_printf.h"
 
 int	ft_putchar(char c)
 {
@@ -13,6 +13,11 @@ int	ft_putstr(char *str)
 	int	count;
 
 	count = 0;
+	if (str == NULL)
+	{
+		ft_putstr("(null)");
+		return (6);
+	}
 	if (!str)
 		return (-1000000);
 	while (*str)
@@ -77,7 +82,7 @@ int	ft_putptr(void *ptr)
 	if (!ptr)
 	{
 		ft_putstr("(nil)");
-		return (1000000);
+		return (5);
 	}
 	num = (unsigned long int)ptr;
 	count = 0;

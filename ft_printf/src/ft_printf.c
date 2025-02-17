@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "ft_printf.h"
 
 static int	identifier(char c, va_list arg)
 {
@@ -19,8 +19,10 @@ static int	identifier(char c, va_list arg)
 		count += ft_putnbrhex(va_arg(arg, int), 'A');
 	else if (c == 'p')
 	{
-		count += ft_putstr("0x");
-		count += ft_putptr(va_arg(arg, void *));
+		void *p = va_arg(arg, void *);
+		if (p)
+			count += ft_putstr("0x");
+		count += ft_putptr(p);
 	}
 	else if (c == '%')
 		count += ft_putchar('%');
@@ -28,7 +30,6 @@ static int	identifier(char c, va_list arg)
 		return (-1);
 	return (count);
 }
-
 
 int	ft_printf(const char *format, ...)
 {
@@ -41,6 +42,11 @@ int	ft_printf(const char *format, ...)
 	va_start(args, format);
 	while (*format)
 	{
+		if (*format != '%')
+		{
+			count += ft_putchar(*format);
+			format++;
+		}
 		if (*format == '%')
 		{
 			format++;
@@ -49,8 +55,6 @@ int	ft_printf(const char *format, ...)
 				return (-1);
 			format++;
 		}
-		count += ft_putchar(*format);
-		format++;
 	}
 	va_end(args);
 	return (count);
