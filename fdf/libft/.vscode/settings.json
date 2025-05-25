@@ -1,0 +1,14 @@
+{
+	"files.associations": {
+		"libft.h": "c",
+		"fcntl.h": "c",
+		"limits.h": "c"
+	},
+	"makefile.configureOnOpen": false,
+	"files.exclude": {
+		"**/*.o": true
+	},
+	"search.exclude": {
+		"**/*.o": true
+	}
+}
