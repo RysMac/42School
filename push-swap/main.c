@@ -2,8 +2,9 @@
 
 int main(int argc, char *argv[])
 {
-	// int arr[] = {32, 2, 54 ,-65 ,68, -9890, 443, 4, 1, 5, 123, 4343, 2345, 50, 10, 657};
-	int arr[] = {1,2,3,4,5,6,7,8,9,10};
+	//int arr[] = {32, 2, 54 ,-65 ,68, -9890, 443, 4, -1, 123, 4343, 2345, 50, 10, 657};
+	//int arr[] = {1,2,3,4,5,6,7,8,9,10};
+	int arr[] = {3, -2, -1};
 	int size = sizeof(arr) / sizeof(int);
 	printf("size %d \n", size);
 	t_stack stack_a;
@@ -11,6 +12,7 @@ int main(int argc, char *argv[])
 	t_node *node;
 	int max_index = 0;
 
+	// initialization
 	stack_a.top = NULL;
 	stack_a.size = 0;
 	stack_b.top = NULL;
@@ -23,8 +25,17 @@ int main(int argc, char *argv[])
 		max_bits++;
 	printf("max bits is : %d \n", max_bits);
 
-	push_swap(&stack_a, &stack_b, max_bits, size);
+	if (stack_a.size <= 3)
+		sort_3(&stack_a);
+	else if (stack_a.size <= 5)
+	{
+		//sort_5(&stack_a, &stack_b);
+		printf("code 5 element \n");
+	}
+	else
+		push_swap(&stack_a, &stack_b, max_bits, size);
 
+	// print results
 	int i = 0;
 	node = stack_a.top;
 	while (i < size)
@@ -39,5 +50,7 @@ int main(int argc, char *argv[])
 		printf("B node value: %d index: %d\n", node->nbr, node->index);
 		node = node->next;
 	}
+
+
 	return (0);
 }

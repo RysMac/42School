@@ -36,8 +36,10 @@ void pb(t_stack *a, t_stack *b);
 void ra(t_stack *a);
 void rb(t_stack *b);
 void rr(t_stack *a, t_stack *b);
+void rra(t_stack *a);
 
 int	assign_values(t_stack *stack, int *arr, int size);
+void sort_3(t_stack *a);
 void push_swap(t_stack *stack_a, t_stack *stack_b, int max_bits, int size);
 
 #endif
