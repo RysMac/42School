@@ -37,9 +37,18 @@ void ra(t_stack *a);
 void rb(t_stack *b);
 void rr(t_stack *a, t_stack *b);
 void rra(t_stack *a);
+void rrb(t_stack *b);
+void rrr(t_stack *a, t_stack *b);
 
 int	assign_values(t_stack *stack, int *arr, int size);
+void	fill_array(int *array, char **argv, int size);
+int	ft_atoi(const char *str);
 void sort_3(t_stack *a);
-void push_swap(t_stack *stack_a, t_stack *stack_b, int max_bits, int size);
+void sort_4(t_stack *a, t_stack *b);
+void sort_5(t_stack *a, t_stack *b);
+void push_swap(t_stack *stack_a, t_stack *stack_b, int size);
+
+int	is_array_sorted(t_stack stack);
+void	error_and_exit(void);
 
 #endif

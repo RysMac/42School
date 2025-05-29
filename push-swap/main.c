@@ -2,11 +2,10 @@
 
 int main(int argc, char *argv[])
 {
-	//int arr[] = {32, 2, 54 ,-65 ,68, -9890, 443, 4, -1, 123, 4343, 2345, 50, 10, 657};
-	//int arr[] = {1,2,3,4,5,6,7,8,9,10};
-	int arr[] = {3, -2, -1};
-	int size = sizeof(arr) / sizeof(int);
-	printf("size %d \n", size);
+	// check if it is already sorted
+	// 4 args
+	// 5 args
+	int arr[argc - 1];
 	t_stack stack_a;
 	t_stack stack_b;
 	t_node *node;
@@ -18,39 +17,42 @@ int main(int argc, char *argv[])
 	stack_b.top = NULL;
 	stack_b.size = 0;
 
-	max_index = assign_values(&stack_a, arr, size);
-	printf("max index is : %d \n", max_index);
-	int max_bits = 0;
-	while ((max_index >> max_bits) != 0)
-		max_bits++;
-	printf("max bits is : %d \n", max_bits);
+	// printf("array length = %d \n", argc - 1);
+	fill_array(arr, argv, argc - 1);
+	int i = 0;
+	// while (i < argc - 1)
+	// {
+	// 	printf("array %d = %d \n", i, arr[i]);
+	// 	i++;
+	// }
+
+	max_index = assign_values(&stack_a, arr, argc - 1);
+
+	int	val = is_array_sorted(stack_a);
+	// printf("is sorted : %d \n", val);
+	if (val == 1)
+		return 0;
+
+	// printf("max bits is : %d \n", max_bits);
 
 	if (stack_a.size <= 3)
 		sort_3(&stack_a);
-	else if (stack_a.size <= 5)
-	{
-		//sort_5(&stack_a, &stack_b);
-		printf("code 5 element \n");
-	}
+	else if (stack_a.size == 4)
+		sort_4(&stack_a, &stack_b);
+	else if (stack_a.size == 5)
+		sort_5(&stack_a, &stack_b);
 	else
-		push_swap(&stack_a, &stack_b, max_bits, size);
+		push_swap(&stack_a, &stack_b, argc - 1);
 
 	// print results
-	int i = 0;
+	i = 0;
 	node = stack_a.top;
-	while (i < size)
+	while (i < argc - 1)
 	{
 		printf("A node value: %d index: %d\n", node->nbr, node->index);
 		node = node->next;
 		i++;
 	}
-	node = stack_b.top;
-	while (node)
-	{
-		printf("B node value: %d index: %d\n", node->nbr, node->index);
-		node = node->next;
-	}
-
-
+	ft_lstclear(&stack_a);
 	return (0);
 }
