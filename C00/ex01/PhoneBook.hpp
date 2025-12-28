@@ -1,3 +1,6 @@
+// if ndef stuff...
+
+
 #include "Contact.hpp"
 
 class	PhoneBook {
