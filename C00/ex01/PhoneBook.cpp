@@ -5,7 +5,7 @@
 #include <cctype>
 #include <cstdlib>
 
-PhoneBook::PhoneBook() : count(0), next(0) {}
+PhoneBook::PhoneBook( void ) : count(0), next(0) {}
 
 static int	get_input(std::string *str, const std::string& input) {
 
