@@ -4,34 +4,44 @@
 
 int	main() {
 
-	std::string str = "abc";
-	std::ofstream out((str + ".replace").c_str());
+	std::string file = "abc";
+	std::string s1 = "XX";
+	std::string	s2 = "co tam slychac";
+	std::string	result;
+
+	std::ifstream in((file).c_str());
+	if (!in) {
+		std::cerr << "Failed to open input file\n";
+		return 1;
+	}
+	std::ofstream out((file + ".replace").c_str());
 	if (!out) {
 		std::cerr << "Failed to open output file\n";
 		return 1;
 	}
 
-	out << "abc XX abc YY abc \n";
-	out.close();
-
-	std::ifstream in((str + ".replace").c_str());
-	if (!in) {
-		std::cerr << "Failed to open input file\n";
-		return 1;
-	}
-
 	std::string line;
-	if (!std::getline(in, line)) {
-		std::cout << " getline error " << "\n";
-		return 1;
+	while (std::getline(in, line)) {
+		std::cout << line << '\n';
+		std::size_t	pos = 0;
+		
+		while (true) {
+			std::size_t found = line.find(s1, pos);
+
+			if (found == std::string::npos) {
+				result += line.substr(pos);
+				break;
+			}
+			result += line.substr(pos, found - pos);
+			result += s2;
+			pos = found + s1.length();
+		}
+		std::cout << result << std::endl;
+		out << result << "\n";
+		result = "";
 	}
-	std::cout << line << '\n';
 
-	std::size_t found = line.find("YY", 0);
 
-	std::cout << found << std::endl;
-
-	// while (std::getline(in, line)) std::cout << line << '\n';
-
+	
 	return 0;
 }
