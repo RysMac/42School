@@ -12,7 +12,6 @@ int main(int argc, char* argv[]) {
 
 	Harl h;
 	int idx = h.levelToIndex(argv[1]);
-
 	switch (idx) {
 	case 0:
 		std::cout << "[ DEBUG ]\n";

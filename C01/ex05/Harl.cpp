@@ -1,5 +1,6 @@
 #include "Harl.hpp"
 #include <iostream>
+#include <string>
 
 void	Harl::debug( void ) {
 	std::cout << "DEBUG level: ";
@@ -17,7 +18,7 @@ void	Harl::info( void ) {
 
 void	Harl::warning( void ) {
 	std::cout << "WARNING level: ";
-	std::cout << "I think I deserve to have some extra bacon for free.";
+	std::cout << "I think I deserve to have some extra bacon for free. ";
 	std::cout << "I’ve been coming for years, whereas you started working here just last month.\n";
 }
 
