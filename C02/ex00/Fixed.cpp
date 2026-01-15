@@ -8,8 +8,9 @@ Fixed::Fixed() : _integer(0) {
 	std::cout << "Default constructor called\n";
 }
 
-Fixed::Fixed(const Fixed& other) : _integer(other._integer) {
+Fixed::Fixed(const Fixed& other) {
 	std::cout << "Copy constructor called\n";
+	*this = other;
 }
 
 Fixed& Fixed::operator=(const Fixed& other) {
