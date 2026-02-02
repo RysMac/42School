@@ -1,0 +1,94 @@
+NAME		= miniRT
+
+CC			= cc
+CFLAGS		= -Wall -Wextra -Werror -Iinclude -Ilibft -Igetnextline -Iminilibx
+
+# ────────────────────────────────────────────────
+# Ścieżki
+# ────────────────────────────────────────────────
+LIBFT_PATH	= libft
+GNL_PATH	= getnextline
+MLX_PATH	= minilibx
+
+# ────────────────────────────────────────────────
+# Flagi linkowania – wersja dla nowej MiniLibX (Metal) na macOS
+# ────────────────────────────────────────────────
+MLX_FLAGS	= -L$(MLX_PATH) -lmlx \
+			  -framework Metal \
+			  -framework AppKit \
+			  -framework QuartzCore
+
+LIBFT_FLAGS	= -L$(LIBFT_PATH) -lft
+GNL_FLAGS	= -L$(GNL_PATH) -lgnl
+MATH_FLAG	= -lm
+
+# ────────────────────────────────────────────────
+# Pliki źródłowe
+# ────────────────────────────────────────────────
+SRCS		= $(wildcard src/*.c)
+OBJS		= $(SRCS:.c=.o)
+
+# ────────────────────────────────────────────────
+# Główna reguła
+# ────────────────────────────────────────────────
+all: libft gnl mlx $(NAME)
+
+# ────────────────────────────────────────────────
+# Budowanie bibliotek
+# ────────────────────────────────────────────────
+libft:
+	@$(MAKE) -C $(LIBFT_PATH)
+
+gnl:
+	@$(MAKE) -C $(GNL_PATH)
+
+mlx:
+	@$(MAKE) -C $(MLX_PATH)
+
+# ────────────────────────────────────────────────
+# Linkowanie programu + rpath (bardzo ważne na macOS dla .dylib)
+# ────────────────────────────────────────────────
+$(NAME): $(OBJS)
+	$(CC) $(OBJS) \
+		$(MLX_FLAGS) $(LIBFT_FLAGS) $(GNL_FLAGS) $(MATH_FLAG) \
+		-Wl,-rpath,$(MLX_PATH) \
+		-o $(NAME)
+
+# ────────────────────────────────────────────────
+# Kompilacja plików źródłowych
+# ────────────────────────────────────────────────
+src/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# ────────────────────────────────────────────────
+# Czyszczenie
+# ────────────────────────────────────────────────
+clean:
+	rm -f $(OBJS)
+	@$(MAKE) -C $(LIBFT_PATH) clean
+	@$(MAKE) -C $(GNL_PATH) clean
+	@$(MAKE) -C $(MLX_PATH) clean
+
+fclean: clean
+	rm -f $(NAME)
+	@$(MAKE) -C $(LIBFT_PATH) fclean
+	@$(MAKE) -C $(GNL_PATH) fclean
+	@$(MAKE) -C $(MLX_PATH) clean
+
+# ────────────────────────────────────────────────
+# Pełne odbudowanie + kopiowanie libmlx.dylib do głównego katalogu (opcjonalne ułatwienie)
+# ────────────────────────────────────────────────
+re: fclean all
+	@cp -f $(MLX_PATH)/libmlx.dylib . 2>/dev/null || true
+	@echo "libmlx.dylib skopiowana do głównego katalogu (opcjonalne)"
+
+# ────────────────────────────────────────────────
+# Dodatkowe przydatne cele
+# ────────────────────────────────────────────────
+norm:
+	@norminette include src libft getnextline | grep -v Norme -B1 || true
+
+run: all
+	@./$(NAME) scenes/simple.rt   # ← zmień na swój plik testowy
+
+.PHONY: all clean fclean re libft gnl mlx norm run
