@@ -65,6 +65,6 @@ void    obj_sphere(t_obj *obj, t_inputdata *inputdata);
 void    obj_plane(t_obj *obj, t_inputdata *inputdata);
 void    obj_cylinder(t_obj *obj, t_inputdata *inputdata);
 
-void    coloring_object(t_framebuffer *fb, const t_obj *obj, const t_camera *camera, t_scene *scene);
+void    coloring_object(t_framebuffer *fb, const t_camera *camera, t_scene *scene);
 
 #endif

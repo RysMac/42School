@@ -1,6 +1,6 @@
 #include "../include/framebuffer.h"
 
-void coloring_object(t_framebuffer *fb, const t_obj *obj, const t_camera *camera, t_scene *scene)
+void coloring_object(t_framebuffer *fb, const t_camera *camera, t_scene *scene)
 {
     size_t  w = fb->w;
     size_t  h = fb->h;
@@ -29,7 +29,7 @@ void coloring_object(t_framebuffer *fb, const t_obj *obj, const t_camera *camera
             hit_any = 0;
             for (int i = 0; i < scene->count ; i++)
             {
-                object = &obj[i];
+                object = &scene->objects[i];
                 if (object->intersect(object, &r, &hit_tmp))
                 {
                     if (hit_tmp.t < t_closest)
