@@ -57,11 +57,6 @@ int	main(int argc, char **argv)
     const size_t h = 600;
 
     t_framebuffer   fb_ppm;
-    // t_camera        camera;
-    // t_obj           *obj;
-    // t_inputdata     *alldata;
-    // t_scene         scene;
-    
     t_data	data;
 
     data.mlx = NULL;
@@ -77,88 +72,24 @@ int	main(int argc, char **argv)
 		exit_error("Usage: ./miniRT scene.rt");
 	parse_file(argv[1], &data.scene); // add here sizes w, h
     
-    // fb_free(&data->fb);
-	free(data.scene.objects);
 
-    // if (fb_init(&fb_ppm, w, h)) // fb size based on camera w, h
-    //     return (1);   
-    // coloring_object(&fb_ppm, &data.scene.camera, &data.scene);
+    if (fb_init(&fb_ppm, w, h)) // fb size based on camera w, h
+        return (1);   
+    coloring_object(&fb_ppm, &data.scene.camera, &data.scene);
     
     // this function is related to mlx
-    // init_and_render(&data);
-
-
-    // // camera direction
-    // double f_in[3] = { 0.0, 0.0, -1.0 };
-    // // rotate_x(f_in, 20 * M_PI / 180);
-    // // rotate_y(f_in, 10 * M_PI / 180);
-    // // camera center
-    // const double c[3] = { 0.0, 0.0, 40.0 };
-    // double fovx = 100.0;
-    // camera_set(&camera, w, h, fovx, f_in, c);
-    
-    // // define some objets sphere, plane, cylinder -> for now hard coded
-    // size_t n = 7;
-    // obj = malloc(sizeof(t_obj) * n );
-    // alldata = malloc(sizeof(t_inputdata) * n );
-
-    // // SPHERES
-    // // sphere normal direction (not needed for sphere so can be any)
-    // double ndir[3] = { 0.0, 0.0, 1.0 };
-    // // position of the sphere center 1 2...
-    // double sc0[3] = {20.0, 20.0, -0.0 };
-    // double sc1[3] = { -20.0, 20.0, -0.0 };
-    // double sc2[3] = { 0.0, 0.0, 0.0 };
-    // double sphere_albedo[3] = {1., 0., 0.};
-    // alldata[0] = inputdata(OBJ_SPHERE, sc0, ndir, sphere_albedo, 10., 0.);
-    // alldata[1] = inputdata(OBJ_SPHERE, sc1, ndir, sphere_albedo, 15., 0.);
-    // alldata[2] = inputdata(OBJ_SPHERE, sc2, ndir, sphere_albedo, 10., 0.);
-    // // PLANES
-    // // plane needs osition + normal direction
-    // double sc3[3] = { 0.0, -20.0, 0.0 };
-    // double sc4[3] = { 0.0, 25.0, -20.0 };
-    // double plane_albedo[3] = {0., 0., 1.};
-    // rotate_x(ndir, -15 * M_PI / 180);
-    // // rotate_y(ndir, 30 * M_PI / 180);
-    // alldata[3] = inputdata(OBJ_PLANE, sc3, ndir, plane_albedo, 0., 0.);
-    // alldata[4] = inputdata(OBJ_PLANE, sc4, ndir, plane_albedo, 0., 0.);
-    // // CYLINDERS
-    // double sc5[3] = { 0.0, 5.0, 5.0 };
-    // double ndirc[3] = { 0.0, 1.0, 0.0 };
-    // double cylinder_albedo[3] = {0.1, 0.5, 0.4};
-    // rotate_z(ndirc, -35 * M_PI / 180);
-    // alldata[5] = inputdata(OBJ_CYLINDER, sc5, ndirc, cylinder_albedo, 5., 80.);
-    // rotate_z(ndirc, -60 * M_PI / 180);
-    // alldata[6] = inputdata(OBJ_CYLINDER, sc5, ndirc, cylinder_albedo, 5., 80.);
-
-    // for (int i = 0; i < n; i++)
-    // {
-    //     build_objects(&obj[i], &alldata[i]);
-    // }
-
-    // // obj_cylinder(&obj[5], &cylinder1);
-    // printf("object set done \n");
-    // scene.objects = obj;
-    // scene.ambient.ambient_color[0] = 1.0;
-    // scene.ambient.ambient_color[1] = 1.0;
-    // scene.ambient.ambient_color[2] = 1.0;
-    // scene.ambient.ambient_ratio = 0.4;
-    // scene.camera = camera;
-    // scene.light.brightness = 1.0;
-    // // the same as camera forward direction
-    // scene.light.pos[0] = 40.0;
-    // scene.light.pos[1] = 5.0;
-    // scene.light.pos[2] = 15.0;
-    // scene.count = n;
-    // printf("scene set done \n");
-
-
-    // coloring_object(&fb, obj, &camera, &scene);
+    init_and_render(&data);
 
     // // here ppm_write should be replaced by mlx...
-    // const char *path = "view.ppm";
-    // if (ppm_write(path, &fb_ppm) == 1)
-    //     printf("wrong ppm_write\n");
-    // printf("end of program \n");
+    const char *path = "view.ppm";
+    if (ppm_write(path, &fb_ppm) == 1)
+        printf("wrong ppm_write\n");
+    printf("end of program \n");
+
+    // free(data.scene.objects);
+
+	mlx_key_hook(data.win, key_hook, &data);
+	mlx_hook(data.win, 17, 0, close_hook, &data);
+	mlx_loop(data.mlx);
     return (0);
 }

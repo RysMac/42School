@@ -4,7 +4,7 @@
 # include "framebuffer.h"
 # include "parse.h"
 # include "scene.h"
-// # include "../minilibx-linux/mlx.h"
+# include "../minilibx-linux/mlx.h"
 
 # define WIDTH 800
 # define HEIGHT 600

@@ -66,5 +66,10 @@ void    obj_plane(t_obj *obj, t_inputdata *inputdata);
 void    obj_cylinder(t_obj *obj, t_inputdata *inputdata);
 
 void    coloring_object(t_framebuffer *fb, const t_camera *camera, t_scene *scene);
-
+void    coloring_object_mlx(t_framebuffer *fb,
+                     const t_camera *camera,
+                     t_scene *scene,
+                     int bpp,
+                     size_t line_len,
+                     int endian);
 #endif
