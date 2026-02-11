@@ -1,5 +1,7 @@
-// this contains
-// camera, Lights, Objects[] + count, Ambient
+#ifndef SCENE_H
+# define SCENE_H
+
+# include <stddef.h>
 
 typedef struct s_obj t_obj;
 
@@ -19,6 +21,7 @@ typedef struct s_light
 {
     double pos[3];
     double brightness;
+    double color[3];
 
 }   t_light;
 
@@ -36,3 +39,5 @@ typedef struct s_scene
     t_obj       *objects; // pointer to whole list of objects
     size_t      count;    // number of all objects
 } t_scene;
+
+#endif
