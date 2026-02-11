@@ -48,8 +48,8 @@ static int intersect_plane(const t_obj *obj, const t_ray *ray, t_hit *hit)
         return (0);
     // hit point in plane/local coords
     point(c, d, t, hit->p);
-    if (fabs(hit->p[0]) > 30 || fabs(hit->p[1]) > 30)
-        return (0);
+    // if (fabs(hit->p[0]) > 30 || fabs(hit->p[1]) > 30)
+    //     return (0);
     // go back to world frame
     rv_inv(hit->p, x, y, obj->pos.dir, hit->p);
     // add translation
@@ -91,4 +91,3 @@ void    obj_plane(t_obj *obj, t_inputdata *inputdata)
     obj->albedo[1] = inputdata->albedo[1];
     obj->albedo[2] = inputdata->albedo[2];
 }
-    

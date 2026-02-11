@@ -10,7 +10,7 @@ void	cleanup(t_data *data)
 		mlx_destroy_window(data->mlx, data->win);
 	if (data->mlx)
 		free(data->mlx);
-	fb_free(&data->fb);
+	// fb_free(&data->fb);
 	free(data->scene.objects);
 	exit(0);
 }

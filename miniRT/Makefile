@@ -25,6 +25,8 @@ LDLIBS  := -lm -L$(GNL_DIR) -L$(LIBFT_DIR)
 
 OBJS	:= $(SRCS:.c=.o)
 
+all: $(NAME)
+
 $(LIBFT_A):
 	$(MAKE) -C $(LIBFT_DIR)
 
@@ -36,8 +38,6 @@ $(NAME): $(OBJS) $(LIBFT_A) $(GNL_A)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
-
-all: $(NAME)
 
 clean:
 	rm -f $(OBJS)
@@ -57,9 +57,9 @@ test:
 ret: re test
 
 testvalg:
-	valgrind ./$(NAME)
+	valgrind ./$(NAME) test.rt
 
 testvalgfull:
-	valgrind --leak-check=full --show-leak-kinds=all ./$(NAME)
+	valgrind --leak-check=full --show-leak-kinds=all ./$(NAME) test.rt
 
 .PHONY: all clean fclean re test testvalg testvalgfull

@@ -12,7 +12,7 @@ void coloring_object(t_framebuffer *fb, const t_camera *camera, t_scene *scene)
     double  t_closest;
     double  R, G, B;
 
-    
+
     r.o[0] = (camera->c)[0];
     r.o[1] = (camera->c)[1];
     r.o[2] = (camera->c)[2];
