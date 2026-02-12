@@ -68,6 +68,9 @@ void coloring_object_mlx(t_framebuffer *fb,
                 shade(scene, &hit, color);
                 R = color[0]; G = color[1]; B = color[2];
             }
+			R = fmax(0.0, fmin(1.0, R));
+            G = fmax(0.0, fmin(1.0, G));
+            B = fmax(0.0, fmin(1.0, B));
 
             uint8_t r8 = to_u8(R);
             uint8_t g8 = to_u8(G);
