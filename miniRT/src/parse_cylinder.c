@@ -15,6 +15,7 @@ void	parse_cylinder(char **s, t_scene *scene)
 	ft_bzero(&in, sizeof(in));
 	parse_vec3(s[1], in.pos);
 	parse_vec3(s[2], in.ndir);
+	vnormalize3(in.ndir, in.ndir); // check the documentation
 	if (!is_normalized(in.ndir))
 		exit_error("Cylinder axis not normalized");
 	diameter = parse_double(s[3]);

@@ -14,7 +14,8 @@ void	parse_camera(char **s, t_scene *scene)
 		exit_error("Invalid camera format (C pos dir fov)");
 	parse_vec3(s[1], c);
 	parse_vec3(s[2], f);
-	if (!is_normalized(f))
+	vnormalize3(f,f);
+	if (!is_normalized(f)) // check documentation here !!!
 		exit_error("Camera direction not normalized");
 	fov = parse_double(s[3]);
 	if (fov < 0.0 || fov > 180.0)

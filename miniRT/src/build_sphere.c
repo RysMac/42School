@@ -24,7 +24,7 @@ static int intersect_sphere(const t_obj *obj, const t_ray *ray, t_hit *hit)
     double c = vdotn(oc, oc, 3) - r * r;
 
     double d = b * b - 4 * a * c;
-    if (d < 0) // no hit
+    if (d < 0.0) // no hit
         return (0); 
     double dsqrt = sqrt(d);
     t0 = (- b + dsqrt) / (2 * a);
@@ -32,9 +32,9 @@ static int intersect_sphere(const t_obj *obj, const t_ray *ray, t_hit *hit)
     swap2(&t0, &t1);
 
     double t_hit;
-    if (t0 >= 1e-6)
+    if (t0 >= 1e-4)
         t_hit = t0;
-    else if (t1 >= 1e-6)
+    else if (t1 >= 1e-4)
         t_hit = t1;
     else
         return 0; // both behind camera/near plane

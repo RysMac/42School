@@ -40,7 +40,7 @@ static int intersect_plane(const t_obj *obj, const t_ray *ray, t_hit *hit)
 
     rv(o, x, y, obj->pos.dir, c);
     rv(ray->d, x, y, obj->pos.dir, d);
-    if ( fabs(d[2]) < 1e-6 ) // parallel
+    if ( fabs(d[2]) < 1e-8 ) // parallel
         return (0);
     else
         t = - c[2] / d[2];

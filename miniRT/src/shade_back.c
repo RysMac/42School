@@ -95,7 +95,7 @@ void shade(const t_scene *scene, const t_hit *hit, double out[3])
     dist_to_light = get_light_vector(scene, hit->p, L);
 
     // If light is exactly at p, just use ambient (degenerate).
-    if (dist_to_light <= 0.0)
+    if (dist_to_light <= 1e-6)
     {
         out[0] = Ca[0];
         out[1] = Ca[1];
@@ -119,7 +119,7 @@ void shade(const t_scene *scene, const t_hit *hit, double out[3])
         t_hit tmp;
 
         // Optional: skip self if your intersect can report t ≈ 0 on the same surface.
-        if (obj == hit->obj) continue;
+        // if (obj == hit->obj) continue;
 
         if (obj->intersect(obj, &shadow, &tmp))
         {

@@ -48,67 +48,89 @@ static int intersect_cylinder(const t_obj *obj, const t_ray *ray, t_hit *hit)
 	rv(o,      x, y, obj->pos.dir, c);
 	rv(ray->d, x, y, obj->pos.dir, d);
 
-	/* ---- SIDE (infinite, then height clip) ---- */
-	double A = vdotn(d, d, 2);        // dx^2 + dy^2
-	double B = 2.0 * vdotn(c, d, 2);  // 2(ox*dx + oy*dy)
-	double C = vdotn(c, c, 2) - r*r;  // ox^2 + oy^2 - r^2
+	#define TMIN 1e-4
+	#define DISC_EPS 1e-12
+	#define CAP_EPS  1e-9
+
+	/* ---- CYLINDER SIDE (fix: test BOTH roots + clamp near-zero negative disc) ---- */
+	double A = vdotn(d, d, 2);        /* dx^2 + dy^2 */
+	double B = 2.0 * vdotn(c, d, 2);  /* 2(ox*dx + oy*dy) */
+	double C = vdotn(c, c, 2) - r*r;  /* ox^2 + oy^2 - r^2 */
+
+	hit_side = 0;
+	t_side = 1e30;
 
 	if (fabs(A) > 1e-12)
 	{
 		double disc = B*B - 4.0*A*C;
-		if (disc >= 0.0)
+
+		/* robustness: treat tiny negative as zero (tangent rays) */
+		if (disc > -DISC_EPS)
 		{
+			if (disc < 0.0) disc = 0.0;
+
 			double sqrtd = sqrt(disc);
 			double t0 = (-B - sqrtd) / (2.0*A);
 			double t1 = (-B + sqrtd) / (2.0*A);
-			swap2(&t0, &t1);
+			if (t0 > t1) { double tmp = t0; t0 = t1; t1 = tmp; }
 
-			double t_candidate = (t0 >= 1e-6) ? t0 : ((t1 >= 1e-6) ? t1 : 1e30);
-			if (t_candidate < 1e30)
+			/* IMPORTANT FIX: test BOTH roots with height clip */
+			if (t0 >= TMIN)
 			{
-				double p_side[3];
-				point(c, d, t_candidate, p_side); // local hit
-				if (p_side[2] >= -hh && p_side[2] <= hh)
+				double p0[3];
+				point(c, d, t0, p0);
+				if (p0[2] >= -hh && p0[2] <= hh)
 				{
-					t_side = t_candidate;
+					t_side = t0;
+					hit_side = 1;
+				}
+			}
+			if (!hit_side && t1 >= TMIN)
+			{
+				double p1[3];
+				point(c, d, t1, p1);
+				if (p1[2] >= -hh && p1[2] <= hh)
+				{
+					t_side = t1;
 					hit_side = 1;
 				}
 			}
 		}
 	}
-	// else: parallel to axis, no side hit
 
-	/* ---- TOP cap ---- */
+	/* ---- CAPS (fix: use same TMIN + allow tiny tolerance on rr<=r^2) ---- */
+	hit_top = 0;
+	hit_bot = 0;
+	t_top = t_bot = 1e30;
+
 	if (fabs(d[2]) > 1e-12)
 	{
-		double t = (hh - c[2]) / d[2]; // z' = +hh
-		if (t >= 1e-4)
+		double t = (hh - c[2]) / d[2]; /* top z=+hh */
+		if (t >= TMIN)
 		{
 			double p_local[3];
-			point(c, d, t, p_local); // local
+			point(c, d, t, p_local);
 			double rr = p_local[0]*p_local[0] + p_local[1]*p_local[1];
-			if (rr <= r*r)
+			if (rr <= r*r + CAP_EPS)
 			{
-				t_top  = t;
+				t_top = t;
 				hit_top = 1;
 			}
 		}
 
-		/* ---- BOTTOM cap ---- */
-		t = (-hh - c[2]) / d[2]; // z' = -hh
-		if (t >= 1e-4)
+		t = (-hh - c[2]) / d[2];       /* bottom z=-hh */
+		if (t >= TMIN)
 		{
 			double p_local[3];
-			point(c, d, t, p_local); // local
+			point(c, d, t, p_local);
 			double rr = p_local[0]*p_local[0] + p_local[1]*p_local[1];
-			if (rr <= r*r)
+			if (rr <= r*r + CAP_EPS)
 			{
-				t_bot  = t;
+				t_bot = t;
 				hit_bot = 1;
 			}
 		}
 	}
-
 	/* ---- choose nearest ---- */
 	double t_best = 1e30;
 	int    hit_type = 0; // 1=side, 2=top, 3=bottom
