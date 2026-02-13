@@ -10,11 +10,21 @@ private:
 	unsigned int	_energyPoints;
 	unsigned int	_attackDamage;
 
+protected:
+	const std::string& getName() const;
+	unsigned int getHitPoints() const;
+	unsigned int getEnergyPoints() const;
+	unsigned int getAttackDamage() const;
+	void setName(const std::string& name);
+	void setHitPoints(unsigned int amount);
+	void setEnergyPoints(unsigned int amount);
+	void setAttackDamage(unsigned int amount);
+
 public:
-	ClapTrap(const std::string Name);
+	ClapTrap(const std::string& name);
 	ClapTrap(const ClapTrap& other);
 	ClapTrap& operator=(const ClapTrap& other);
-	~ClapTrap();
+	virtual ~ClapTrap();
 
 	void	attack(const std::string& target);
 	void	takeDamage(unsigned int amount);

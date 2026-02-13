@@ -1,24 +1,24 @@
 #include "ClapTrap.hpp"
 
-ClapTrap::ClapTrap(const std::string name) : _name(name),
-											 _hitPoints(100),
-											 _energyPoints(50),
-											 _attackDamage(20)
+ClapTrap::ClapTrap(const std::string& name) : _name(name),
+											 _hitPoints(10),
+											 _energyPoints(10),
+											 _attackDamage(0)
 {
-	std::cout << "constructor called: ClapTrap " << name << std::endl;
-};
+	std::cout << "ClapTrap constructor called :  " << name << std::endl;
+}
 
 ClapTrap::ClapTrap(const ClapTrap &other) : _name(other._name),
 											_hitPoints(other._hitPoints),
 											_energyPoints(other._energyPoints),
 											_attackDamage(other._attackDamage)
 {
-	std::cout << "copy constructor called: ClapTrap " << _name << std::endl;
-};
+	std::cout << "ClapTrap copy constructor called: " << _name << std::endl;
+}
 
 ClapTrap &ClapTrap::operator=(const ClapTrap &other)
 {
-	std::cout << "copy assignment operator called" << std::endl;
+	std::cout << "ClapTrap copy assignment operator called" << std::endl;
 	if (this != &other)
 	{
 		_name = other._name;
@@ -31,8 +31,18 @@ ClapTrap &ClapTrap::operator=(const ClapTrap &other)
 
 ClapTrap::~ClapTrap()
 {
-	std::cout << "deconstructor called: ClapTrap" << _name << std::endl;
-};
+	std::cout << "ClapTrap destructor called: " << _name << std::endl;
+}
+
+const std::string& ClapTrap::getName() const { return _name; }
+unsigned int ClapTrap::getHitPoints() const { return _hitPoints; }
+unsigned int ClapTrap::getEnergyPoints() const { return _energyPoints; }
+unsigned int ClapTrap::getAttackDamage() const { return _attackDamage; }
+
+void ClapTrap::setName(const std::string& name) { _name = name; }
+void ClapTrap::setHitPoints(unsigned int amount) { _hitPoints = amount; }
+void ClapTrap::setEnergyPoints(unsigned int amount) { _energyPoints = amount; }
+void ClapTrap::setAttackDamage(unsigned int amount) { _attackDamage = amount; }
 
 void ClapTrap::attack(const std::string &target)
 {
