@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_light.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/22 12:31:20 by mrys              #+#    #+#             */
+/*   Updated: 2026/02/22 12:31:28 by mrys             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "parse.h"
 
 void	parse_light(char **s, t_scene *scene)
@@ -7,16 +19,12 @@ void	parse_light(char **s, t_scene *scene)
 	len = 0;
 	while (s[len])
 		len++;
-	
 	if (len != 3 && len != 4)
 		exit_error("Invalid light format (L pos brightness [color])");
-
 	parse_vec3(s[1], scene->light.pos);
 	scene->light.brightness = parse_double(s[2]);
 	if (scene->light.brightness < 0.0 || scene->light.brightness > 1.0)
 		exit_error("Light brightness must be in [0,1]");
-
-	// Jeśli jest kolor – wczytaj, jeśli nie – domyślnie biały
 	if (len == 4)
 		parse_color(s[3], scene->light.color);
 	else

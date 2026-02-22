@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/22 11:19:16 by mrys              #+#    #+#             */
+/*   Updated: 2026/02/22 11:31:07 by mrys             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PARSE_H
 # define PARSE_H
 
@@ -6,7 +18,8 @@
 # include "../libft/libft.h"
 
 void	parse_file(const char *path, t_scene *scene);
-void	parse_line(char *line, t_scene *scene, int *has_a, int *has_c, int *has_l);
+void	parse_line(char *line, t_scene *scene,
+			int *has_a, int *has_c, int *has_l);
 
 void	parse_ambient(char **split, t_scene *scene);
 void	parse_camera(char **split, t_scene *scene);
