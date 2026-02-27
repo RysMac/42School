@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   build_cylinder.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/24 13:19:15 by mrys              #+#    #+#             */
+/*   Updated: 2026/02/24 13:19:15 by mrys             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/framebuffer.h"
 
 // n, x, y are local plane basis needed for transformation matrix R
@@ -25,16 +37,16 @@ void    cylinder_basis(const double n[3], double x[3], double y[3])
 
 static int intersect_cylinder(const t_obj *obj, const t_ray *ray, t_hit *hit)
 {
-	double x[3], y[3];
-	double o[3];      // world, relative to center
-	double c[3];      // local origin
-	double d[3];      // local dir
-	double r = obj->shape.cylinder.radius;
-	double hh = obj->shape.cylinder.height * 0.5;
-	double t_side = 1e30;
-	double t_top  = 1e30;
-	double t_bot  = 1e30;
-	int    hit_side = 0, hit_top = 0, hit_bot = 0;
+	double	x[3], y[3];
+	double	o[3];      // world, relative to center
+	double	c[3];      // local origin
+	double	d[3];      // local dir
+	double	r = obj->shape.cylinder.radius;
+	double	hh = obj->shape.cylinder.height * 0.5;
+	double	t_side = 1e30;
+	double	t_top  = 1e30;
+	double	t_bot  = 1e30;
+	int		hit_side = 0, hit_top = 0, hit_bot = 0;
 
 	// build basis
 	cylinder_basis(obj->pos.dir, x, y);
@@ -45,7 +57,7 @@ static int intersect_cylinder(const t_obj *obj, const t_ray *ray, t_hit *hit)
 	o[2] = ray->o[2] - obj->pos.pos[2];
 
 	// world -> local
-	rv(o,      x, y, obj->pos.dir, c);
+	rv(o, x, y, obj->pos.dir, c);
 	rv(ray->d, x, y, obj->pos.dir, d);
 
 	#define TMIN 1e-4
@@ -69,9 +81,8 @@ static int intersect_cylinder(const t_obj *obj, const t_ray *ray, t_hit *hit)
 		{
 			if (disc < 0.0) disc = 0.0;
 
-			double sqrtd = sqrt(disc);
-			double t0 = (-B - sqrtd) / (2.0*A);
-			double t1 = (-B + sqrtd) / (2.0*A);
+			double t0 = (-B - sqrt(disc)) / (2.0*A);
+			double t1 = (-B + sqrt(disc)) / (2.0*A);
 			if (t0 > t1) { double tmp = t0; t0 = t1; t1 = tmp; }
 
 			/* IMPORTANT FIX: test BOTH roots with height clip */
@@ -205,16 +216,16 @@ static int intersect_cylinder(const t_obj *obj, const t_ray *ray, t_hit *hit)
 	return 1;
 }
 
-void    obj_cylinder(t_obj *obj, t_inputdata *inputdata)
+// pos - center point position in global frame
+// pos.dir - normal direction (needed only for plane)
+void	obj_cylinder(t_obj *obj, t_inputdata *inputdata)
 {
-	double tmp[3];
+	double	tmp[3];
 
 	obj->type = OBJ_CYLINDER;
-	// center point position in global frame
 	obj->pos.pos[0] = inputdata->pos[0];
 	obj->pos.pos[1] = inputdata->pos[1];
 	obj->pos.pos[2] = inputdata->pos[2];
-	// normal direction (needed only for plane)
 	vnormalize3(inputdata->ndir, tmp);
 	obj->pos.dir[0] = tmp[0];
 	obj->pos.dir[1] = tmp[1];

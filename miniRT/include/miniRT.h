@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:23:54 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/22 11:24:44 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/26 13:53:52 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,10 @@ typedef struct s_data
 	int				bpp;
 	int				line_len;
 	int				endian;
+	int				w;
+	int				h;
 	t_framebuffer	fb;
+	t_framebuffer	fb_ppm;
 	t_scene			scene;
 }	t_data;
 
@@ -40,5 +43,7 @@ void	cleanup(t_data *data);
 int		key_hook(int keycode, t_data *data);
 int		close_hook(t_data *data);
 void	init_and_render(t_data *data);
+void	coloring_object_mlx(t_data *data);
+void	coloring_object(t_data *data);
 
 #endif

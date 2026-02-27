@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:38:40 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/22 11:43:29 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/26 12:35:35 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 # include <math.h>
 # include "scene.h"
 # include "object.h"
+# include "framebuffer.h"
+// # include "miniRT.h"
 
 # ifndef M_PI
 # define M_PI 3.14159265358979323846
@@ -81,9 +83,4 @@ void		obj_sphere(t_obj *obj, t_inputdata *inputdata);
 void		obj_plane(t_obj *obj, t_inputdata *inputdata);
 void		obj_cylinder(t_obj *obj, t_inputdata *inputdata);
 
-void		coloring_object(t_framebuffer *fb, const t_camera *camera,
-				t_scene *scene);
-void		coloring_object_mlx(t_framebuffer *fb,
-				const t_camera *camera, t_scene *scene,
-				int bpp, size_t line_len, int endian);
 #endif

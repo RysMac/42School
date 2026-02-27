@@ -1,10 +1,29 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   build_plane.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/24 12:52:10 by mrys              #+#    #+#             */
+/*   Updated: 2026/02/24 12:52:12 by mrys             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/framebuffer.h"
+
+static void	reverse_hit(t_hit *hit)
+{
+	hit->n[0] = -hit->n[0];
+	hit->n[1] = -hit->n[1];
+	hit->n[2] = -hit->n[2];
+}
 
 // n, x, y are local plane basis needed for transformation matrix R
 // check if n is normalized
 void	plane_basis(const double n[3], double x[3], double y[3])
 {
-	double u[3];
+	double	u[3];
 
 	if (fabs(n[1]) < 0.99)
 	{
@@ -23,36 +42,47 @@ void	plane_basis(const double n[3], double x[3], double y[3])
 	cross3(n, x, y);
 }
 
-static int	intersect_plane(const t_obj *obj, const t_ray *ray, t_hit *hit)
+static int	find_t(const t_obj *obj, const t_ray *ray, t_hit *hit, double *t)
 {
-	double o[3];
-	double c[3];
-	double x[3];
-	double y[3];
-	double d[3];
-	double t;
+	double	o[3];
+	double	x[3];
+	double	y[3];
+	double	d[3];
+	double	c[3];
 
 	plane_basis(obj->pos.dir, x, y);
-	// ray->o is origin of camera obj->pos.pos is a point on the plane
 	o[0] = ray->o[0] - obj->pos.pos[0];
 	o[1] = ray->o[1] - obj->pos.pos[1];
 	o[2] = ray->o[2] - obj->pos.pos[2];
-
 	rv(o, x, y, obj->pos.dir, c);
 	rv(ray->d, x, y, obj->pos.dir, d);
-	if (fabs(d[2]) < 1e-8) // parallel
+	if (fabs(d[2]) < 1e-8)
 		return (0);
 	else
-		t = -c[2] / d[2];
-	if (t < 1e-4)
+		*t = -c[2] / d[2];
+	if (*t < 1e-4)
 		return (0);
-	// hit point in plane/local coords
-	point(c, d, t, hit->p);
-	// if (fabs(hit->p[0]) > 30 || fabs(hit->p[1]) > 30)
-	//     return (0);
-	// go back to world frame
+	point(c, d, *t, hit->p);
+	return (1);
+}
+
+/* 
+	add: if (fabs(hit->p[0]) > 30 || fabs(hit->p[1]) > 30) return (0);
+	if you want not infinite plane
+
+	ray->o is origin of camera obj->pos.pos is a point on the plane
+*/
+static int	intersect_plane(const t_obj *obj, const t_ray *ray, t_hit *hit)
+{
+	double	x[3];
+	double	y[3];
+	double	t;
+	double	d_dot_n;
+
+	plane_basis(obj->pos.dir, x, y);
+	if (find_t(obj, ray, hit, &t) == 0)
+		return (0);
 	rv_inv(hit->p, x, y, obj->pos.dir, hit->p);
-	// add translation
 	hit->obj = obj;
 	hit->p[0] = obj->pos.pos[0] + hit->p[0];
 	hit->p[1] = obj->pos.pos[1] + hit->p[1];
@@ -62,20 +92,16 @@ static int	intersect_plane(const t_obj *obj, const t_ray *ray, t_hit *hit)
 	hit->n[1] = obj->pos.dir[1];
 	hit->n[2] = obj->pos.dir[2];
 	vnormalize3(hit->n, hit->n);
-	double d_dot_n = vdotn(ray->d, hit->n, 3);
+	d_dot_n = vdotn(ray->d, hit->n, 3);
 	if (d_dot_n > 0.0)
-	{
-		hit->n[0] = -hit->n[0];
-		hit->n[1] = -hit->n[1];
-		hit->n[2] = -hit->n[2];
-	}
+		reverse_hit(hit);
 	return (1);
 }
 
 // pos - center point position in global frame
-void obj_plane(t_obj *obj, t_inputdata *inputdata)
+void	obj_plane(t_obj *obj, t_inputdata *inputdata)
 {
-	double tmp[3];
+	double	tmp[3];
 
 	obj->type = OBJ_PLANE;
 	obj->pos.pos[0] = inputdata->pos[0];

@@ -1,8 +1,7 @@
 CC		:= gcc -g
 CFLAGS	:= -lgnl -lft #-Wall -Wextra -Werror
 INCS	:= -Iinclude
-SRCS	:= src/algebra1.c src/algebra2.c src/frame.c src/coloring.c\
-		src/coloring_mlx.c \
+SRCS	:= src/algebra1.c src/algebra2.c src/frame.c src/coloring_mlx.c \
 		src/hooks.c src/camera.c src/helper1.c src/shade.c \
 		src/build_plane.c src/build_cylinder.c src/build_sphere.c \
 		src/ppm_write.c src/ray_dir.c  \

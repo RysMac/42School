@@ -1,91 +1,110 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   coloring_mlx.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/26 11:13:19 by mrys              #+#    #+#             */
+/*   Updated: 2026/02/26 11:13:19 by mrys             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 #include "../include/framebuffer.h"
+#include "../include/miniRT.h"
 
-static inline uint8_t to_u8(double v)
+static void	dir_dij(const t_camera *camera, t_ray *ray, int x, int y)
 {
-	if (v < 0.0)
-		v = 0.0;
-	if (v > 1.0)
-		v = 1.0;
-	return (uint8_t)(v * 255.0 + 0.5);
+	double	dij[3];
+
+	d_ij(camera, x, y, dij);
+	ray->d[0] = dij[0];
+	ray->d[1] = dij[1];
+	ray->d[2] = dij[2];
+	vnormalize3(ray->d, ray->d);
 }
 
-void coloring_object_mlx(t_framebuffer *fb,
-						 const t_camera *camera,
-						 t_scene *scene,
-						 int bpp,
-						 size_t line_len,
-						 int endian)
+static int	find_hit(t_scene *scene, t_ray *ray, t_hit *hit)
 {
-	size_t w = fb->w;
-	size_t h = fb->h;
+	double		t_closest;
+	int			hit_any;
+	const t_obj	*object;
+	t_hit		tmp;
+	size_t		i;
 
-	int bytespp = bpp / 8;
-	if (bytespp != 4)
+	t_closest = 1e30;
+	hit_any = 0;
+	i = 0;
+	while (i < (size_t)scene->count)
 	{
-		printf("your code is written for 32bpp only");
-		return;
-	}
-	t_ray r;
-	t_hit hit;
-
-	r.o[0] = camera->c[0];
-	r.o[1] = camera->c[1];
-	r.o[2] = camera->c[2];
-
-	for (size_t y = 0; y < h; ++y)
-	{
-		for (size_t x = 0; x < w; ++x)
+		object = &scene->objects[i];
+		if (object->intersect(object, ray, &tmp))
 		{
-			double dij[3];
-			d_ij(camera, (int)x, (int)y, dij);
-
-			r.d[0] = dij[0];
-			r.d[1] = dij[1];
-			r.d[2] = dij[2];
-			vnormalize3(r.d, r.d);
-
-			double t_closest = 1e30;
-			int hit_any = 0;
-
-			for (size_t i = 0; i < (size_t)scene->count; ++i)
+			if (tmp.t > 0.001 && tmp.t < t_closest)
 			{
-				const t_obj *object = &scene->objects[i];
-				t_hit tmp;
-
-				if (object->intersect(object, &r, &tmp))
-				{
-					if (tmp.t > 0.001 && tmp.t < t_closest)
-					{
-						t_closest = tmp.t;
-						hit = tmp;
-						hit_any = 1;
-					}
-				}
+				t_closest = tmp.t;
+				*hit = tmp;
+				hit_any = 1;
 			}
-
-			double R = 0.0, G = 0.0, B = 0.0;
-			if (hit_any)
-			{
-				double color[3];
-				shade(scene, &hit, color);
-				R = color[0];
-				G = color[1];
-				B = color[2];
-			}
-			R = fmax(0.0, fmin(1.0, R));
-			G = fmax(0.0, fmin(1.0, G));
-			B = fmax(0.0, fmin(1.0, B));
-
-			uint8_t r8 = to_u8(R);
-			uint8_t g8 = to_u8(G);
-			uint8_t b8 = to_u8(B);
-			uint8_t a8 = 255;
-
-			size_t idx = y * line_len + x * (size_t)bytespp;
-			fb->data[idx + 0] = b8;
-			fb->data[idx + 1] = g8;
-			fb->data[idx + 2] = r8;
-			fb->data[idx + 3] = a8;
 		}
+		++i;
+	}
+	return (hit_any);
+}
+
+static void	set_rgb(t_data *data, t_hit *hit, int hit_any, size_t idx)
+{
+	double	rgb[3];
+
+	if (hit_any)
+		shade(&data->scene, hit, rgb);
+	else
+	{
+		rgb[0] = 0.0;
+		rgb[1] = 0.0;
+		rgb[2] = 0.0;
+	}
+	rgb[0] = fmin(1.0, fmax(0.0, rgb[0]));
+	rgb[1] = fmin(1.0, fmax(0.0, rgb[1]));
+	rgb[2] = fmin(1.0, fmax(0.0, rgb[2]));
+	data->fb.data[idx + 0] = (uint8_t)(rgb[2] * 255.0 + 0.5);
+	data->fb.data[idx + 1] = (uint8_t)(rgb[1] * 255.0 + 0.5);
+	data->fb.data[idx + 2] = (uint8_t)(rgb[0] * 255.0 + 0.5);
+	data->fb.data[idx + 3] = (uint8_t)255;
+}
+
+static void	set_color(t_data *data, t_ray *ray, size_t x, size_t y)
+{
+	t_hit	hit;
+	int		hit_any;
+	size_t	idx;
+
+	dir_dij(&(data->scene.camera), ray, (int)x, (int)y);
+	hit_any = find_hit(&(data->scene), ray, &hit);
+	idx = y * data->line_len + x * (size_t)(data->bpp / 8);
+	set_rgb(data, &hit, hit_any, idx);
+}
+
+// as input only t_data*
+void	coloring_object_mlx(t_data *data)
+{
+	t_ray	r;
+	size_t	x;
+	size_t	y;
+
+	if (data->bpp / 8 != 4)
+		return ((void)printf("your code is written for 32bpp only"));
+	r.o[0] = data->scene.camera.c[0];
+	r.o[1] = data->scene.camera.c[1];
+	r.o[2] = data->scene.camera.c[2];
+	y = 0;
+	while (y < data->fb.h)
+	{
+		x = 0;
+		while (x < data->fb.w)
+		{
+			set_color(data, &r, x, y);
+			++x;
+		}
+		++y;
 	}
 }

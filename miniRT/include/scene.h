@@ -16,6 +16,7 @@
 # include <stddef.h>
 
 typedef struct s_obj	t_obj;
+
 /*  c - camera center
 	f - forward direction
 	r - right
@@ -58,6 +59,8 @@ typedef struct s_scene
 	t_ambient	ambient;
 	t_obj		*objects;
 	size_t		count;
+	int			w;
+	int			h;
 }	t_scene;
 
 #endif

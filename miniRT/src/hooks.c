@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 12:21:48 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/22 12:24:20 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/26 12:06:08 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,7 @@ void	init_and_render(t_data *data)
 		exit_error("mlx_get_data_addr failed");
 	fb_init(&data->fb, WIDTH, HEIGHT);
 	data->fb.data = (uint8_t *)data->addr;
-	coloring_object_mlx(&data->fb, &data->scene.camera,
-		&data->scene, data->bpp, data->line_len, data->endian);
+	coloring_object_mlx(data);
 	mlx_put_image_to_window(data->mlx, data->win, data->img, 0, 0);
 	mlx_key_hook(data->win, key_hook, data);
 	mlx_hook(data->win, 17, 0, close_hook, data);
