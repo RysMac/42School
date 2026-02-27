@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:38:40 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/26 12:35:35 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/27 12:17:34 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,12 @@
 # include "scene.h"
 # include "object.h"
 # include "framebuffer.h"
-// # include "miniRT.h"
 
 # ifndef M_PI
 # define M_PI 3.14159265358979323846
 # endif
+
+typedef struct s_cyl_ctx t_cyl_ctx;
 
 typedef struct s_inputdata
 {
@@ -83,4 +84,17 @@ void		obj_sphere(t_obj *obj, t_inputdata *inputdata);
 void		obj_plane(t_obj *obj, t_inputdata *inputdata);
 void		obj_cylinder(t_obj *obj, t_inputdata *inputdata);
 
+// cylinderh1
+void	cylinder_basis(const double n[3], double x[3], double y[3]);
+void	cyl_init_ctx(t_cyl_ctx *k, const t_obj *obj);
+void	cyl_build_basis(t_cyl_ctx *k, const t_obj *obj);
+void	cyl_set_local_ray(t_cyl_ctx *k, const t_obj *obj,
+		const t_ray *ray);
+void	cyl_side_accept(t_cyl_ctx *k, double t);
+// cylinderh2
+void	cyl_intersect_side(t_cyl_ctx *k);
+void	cyl_cap_accept(t_cyl_ctx *k, double t, int top);
+void	cyl_intersect_caps(t_cyl_ctx *k);
+void	cyl_choose_best(t_cyl_ctx *k);
+void	cyl_compute_local_pn(t_cyl_ctx *k);
 #endif

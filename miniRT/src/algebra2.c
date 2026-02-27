@@ -6,14 +6,13 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 12:10:10 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/26 12:03:41 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/27 12:21:55 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <math.h>
 #include <stddef.h>
 #include "framebuffer.h"
-// #include "miniRT.h"
 
 // v' = R v, where rows of R are x, y, z (your basis vectors)
 // projection on x'
