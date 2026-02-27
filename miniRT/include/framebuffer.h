@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:38:40 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/27 12:17:34 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/27 14:54:12 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ void		fb_free(t_framebuffer *fb);
 int			ppm_write(const char *path, const t_framebuffer *fb);
 
 void		d_ij(const t_camera *camera, int i, int j, double dij[3]);
-void		camera_set(t_camera *camera, int w, int h,
+void		camera_set(t_camera *camera,
 				double fov, const double f_in[3], const double c[3]);
 
 // build objects

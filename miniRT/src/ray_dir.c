@@ -45,8 +45,8 @@ void	d_ij(const t_camera *camera, int i, int j, double dij[3])
 	double	ysj;
 	double	d[3];
 
-	xsi = xs_i(i, camera->w, camera->fovx);
-	ysj = ys_i(j, camera->h, camera->fovy);
+	xsi = xs_i(i, *camera->w, camera->fovx);
+	ysj = ys_i(j, *camera->h, camera->fovy);
 	d[0] = camera->f[0] + xsi * camera->r[0] + ysj * camera->u[0];
 	d[1] = camera->f[1] + xsi * camera->r[1] + ysj * camera->u[1];
 	d[2] = camera->f[2] + xsi * camera->r[2] + ysj * camera->u[2];

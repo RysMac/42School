@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 12:21:48 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/26 12:06:08 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/27 14:42:36 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,17 +45,17 @@ void	init_and_render(t_data *data)
 	data->mlx = mlx_init();
 	if (!data->mlx)
 		exit_error("mlx_init failed");
-	data->win = mlx_new_window(data->mlx, WIDTH, HEIGHT, "miniRT");
+	data->win = mlx_new_window(data->mlx, data->w, data->h, "miniRT");
 	if (!data->win)
 		exit_error("mlx_new_window failed");
-	data->img = mlx_new_image(data->mlx, WIDTH, HEIGHT);
+	data->img = mlx_new_image(data->mlx, data->w, data->h);
 	if (!data->img)
 		exit_error("mlx_new_image failed");
 	data->addr = mlx_get_data_addr(data->img, &data->bpp,
 			&data->line_len, &data->endian);
 	if (!data->addr)
 		exit_error("mlx_get_data_addr failed");
-	fb_init(&data->fb, WIDTH, HEIGHT);
+	fb_init(&data->fb, data->w, data->h);
 	data->fb.data = (uint8_t *)data->addr;
 	coloring_object_mlx(data);
 	mlx_put_image_to_window(data->mlx, data->win, data->img, 0, 0);

@@ -12,9 +12,6 @@ double print_vector3(const double v[3])
 
 int main(int argc, char **argv)
 {
-	const size_t w = 800;
-	const size_t h = 600;
-
 	t_data data;
 
 	data.mlx = NULL;
@@ -24,6 +21,11 @@ int main(int argc, char **argv)
 	data.bpp = 0;
 	data.line_len = 0;
 	data.endian = 0;
+	data.w = 800;
+	data.h = 250;
+	data.scene.camera.w = &data.w;
+	data.scene.camera.h = &data.h;
+
 
 	if (argc != 2)
 		exit_error("Usage: ./miniRT scene.rt");

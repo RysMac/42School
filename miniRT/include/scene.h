@@ -24,8 +24,8 @@ typedef struct s_obj	t_obj;
 */
 typedef struct s_camera
 {
-	int		w;
-	int		h;
+	int		*w;
+	int		*h;
 	double	fovx;
 	double	fovy;
 	double	c[3];

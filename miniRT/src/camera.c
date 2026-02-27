@@ -39,7 +39,6 @@ static void	base(const double f_in[3], double f[3], double up[3])
 		up[1] = ud[1];
 		up[2] = ud[2];
 	}
-	
 }
 
 static void	camera_basis(t_camera *camera, const double f_in[3])
@@ -65,17 +64,15 @@ static void	camera_basis(t_camera *camera, const double f_in[3])
 	}
 }
 
-void	camera_set(t_camera *camera, int w, int h, double fovx,
+void	camera_set(t_camera *camera, double fovx,
 				const double f_in[3], const double c[3])
 {
 	double	ar;
 	double	fovx_rad;
 	size_t	i;
 
-	ar = (double)w / (double)h;
+	ar = (double)(*camera->w) / (double)(*camera->h);
 	fovx_rad = fovx * M_PI / 180.0;
-	camera->w = w;
-	camera->h = h;
 	camera->fovx = fovx;
 	camera->fovy = (2 * atan(tan(fovx_rad / 2) / ar)) * 180.0 / M_PI;
 	i = 0;
