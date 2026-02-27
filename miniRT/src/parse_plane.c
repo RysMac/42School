@@ -6,12 +6,13 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 12:34:25 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/22 12:34:26 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/27 14:28:10 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parse.h"
 
+// be carefull input is normalized
 void	parse_plane(char **s, t_scene *scene)
 {
 	t_inputdata	in;

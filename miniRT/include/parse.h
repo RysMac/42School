@@ -15,11 +15,17 @@
 
 # include "scene.h"
 # include "framebuffer.h"
-# include "../libft/libft.h"
+# include "../libft/libft.h" 
+
+typedef struct s_flags
+{
+    int has_a;
+    int has_c;
+    int has_l;
+}   t_flags;
 
 void	parse_file(const char *path, t_scene *scene);
-void	parse_line(char *line, t_scene *scene,
-			int *has_a, int *has_c, int *has_l);
+void	parse_line(char *line, t_scene *scene, t_flags *flags);
 
 void	parse_ambient(char **split, t_scene *scene);
 void	parse_camera(char **split, t_scene *scene);

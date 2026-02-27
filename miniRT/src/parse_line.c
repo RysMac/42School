@@ -21,11 +21,31 @@ static void	skip_comment(char *line)
 		*comment = '\0';
 }
 
-static void	handle_ambient(char **split, t_scene *scene, int *has_a);
-static void	handle_camera(char **split, t_scene *scene, int *has_c);
-static void	handle_light(char **split, t_scene *scene, int *has_l);
+static void	handle_ambient(char **split, t_scene *scene, t_flags *flags)
+{
+	if (flags->has_a)
+		exit_error("Duplicate ambient lighting");
+	parse_ambient(split, scene);
+	flags->has_a = 1;
+}
 
-void	parse_line(char *line, t_scene *scene, int *has_a, int *has_c, int *has_l)
+static void	handle_camera(char **split, t_scene *scene, t_flags *flags)
+{
+	if (flags->has_c)
+		exit_error("Duplicate camera");
+	parse_camera(split, scene);
+	flags->has_c = 1;
+}
+
+static void	handle_light(char **split, t_scene *scene, t_flags *flags)
+{
+	if (flags->has_l)
+		exit_error("Duplicate light");
+	parse_light(split, scene);
+	flags->has_l = 1;
+}
+
+void	parse_line(char *line, t_scene *scene, t_flags *flags)
 {
 	char	**split;
 
@@ -37,11 +57,11 @@ void	parse_line(char *line, t_scene *scene, int *has_a, int *has_c, int *has_l)
 		return ;
 	}
 	if (ft_strncmp(split[0], "A", 2) == 0)
-		handle_ambient(split, scene, has_a);
+		handle_ambient(split, scene, flags);
 	else if (ft_strncmp(split[0], "C", 2) == 0)
-		handle_camera(split, scene, has_c);
+		handle_camera(split, scene, flags);
 	else if (ft_strncmp(split[0], "L", 2) == 0)
-		handle_light(split, scene, has_l);
+		handle_light(split, scene, flags);
 	else if (ft_strncmp(split[0], "sp", 3) == 0)
 		parse_sphere(split, scene);
 	else if (ft_strncmp(split[0], "pl", 3) == 0)
@@ -51,28 +71,4 @@ void	parse_line(char *line, t_scene *scene, int *has_a, int *has_c, int *has_l)
 	else
 		exit_error("Unknown element type");
 	ft_free_tab(split);
-}
-
-static void	handle_ambient(char **split, t_scene *scene, int *has_a)
-{
-	if (*has_a)
-		exit_error("Duplicate ambient lighting");
-	parse_ambient(split, scene);
-	*has_a = 1;
-}
-
-static void	handle_camera(char **split, t_scene *scene, int *has_c)
-{
-	if (*has_c)
-		exit_error("Duplicate camera");
-	parse_camera(split, scene);
-	*has_c = 1;
-}
-
-static void	handle_light(char **split, t_scene *scene, int *has_l)
-{
-	if (*has_l)
-		exit_error("Duplicate light");
-	parse_light(split, scene);
-	*has_l = 1;
 }
