@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	data.line_len = 0;
 	data.endian = 0;
 	data.w = 800;
-	data.h = 250;
+	data.h = 600;
 	data.scene.camera.w = &data.w;
 	data.scene.camera.h = &data.h;
 

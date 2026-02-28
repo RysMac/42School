@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:38:40 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/27 14:54:12 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 17:41:14 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ void		point(const double o[3], const double d[3],
 void		swap2(double *t0, double *t1);
 
 // shade lights etc
+int			check_hit(const t_hit *hit, double color[3]);
+void		ambient_term(const t_scene *scene, const t_hit *hit, double out[3]);
 void		shade(const t_scene *scene, const t_hit *hit, double out[3]);
 
 //*************** */
@@ -97,4 +99,10 @@ void	cyl_cap_accept(t_cyl_ctx *k, double t, int top);
 void	cyl_intersect_caps(t_cyl_ctx *k);
 void	cyl_choose_best(t_cyl_ctx *k);
 void	cyl_compute_local_pn(t_cyl_ctx *k);
+// vector calculus
+void	vec_sub(const double a[3], const double b[3], double out[3]);
+double	vec_dot(const double a[3], const double b[3]);
+double	vec_len(const double v[3]);
+void	vec_scale(const double v[3], double s, double out[3]);
+void	vec_clamp01(double v[3]);
 #endif

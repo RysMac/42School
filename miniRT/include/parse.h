@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:19:16 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/22 11:31:07 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 18:02:23 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void	add_object(t_scene *scene, t_obj *obj);
 double	parse_double(char *s);
 void	parse_vec3(char *s, double v[3]);
 void	parse_color(char *s, double c[3]);
+double	parse_double_internal(const char *str);
 int		is_normalized(double v[3]);
 int		is_number(char *s);
 void	exit_error(const char *msg);
