@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:23:54 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/27 14:56:37 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 19:21:52 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ typedef struct s_cyl_params
 	double	cyl_disc_eps;
 	double	cyl_cap_eps;
 	double	cyl_inf;
-	
+
 }	t_cyl_params;
 
 // x,y	local frame (x,y) with axis = obj->pos.dir
@@ -58,31 +58,31 @@ typedef struct s_cyl_params
 // hit_type	0 none, 1 side, 2 top, 3 bottom
 typedef struct s_cyl_ctx
 {
-	double	x[3];
-	double	y[3];
-	double	c[3];
-	double	d[3];
-	double	p_local[3];
-	double	n_local[3];
-	double	p_world[3];
-	double	n_world[3];
+	double			x[3];
+	double			y[3];
+	double			c[3];
+	double			d[3];
+	double			p_local[3];
+	double			n_local[3];
+	double			p_world[3];
+	double			n_world[3];
 
-	double	r;
-	double	hh;
-	double	t_side;
-	double	t_top;
-	double	t_bot;
-	int		hit_side;
-	int		hit_top;
-	int		hit_bot;
+	double			r;
+	double			hh;
+	double			t_side;
+	double			t_top;
+	double			t_bot;
+	int				hit_side;
+	int				hit_top;
+	int				hit_bot;
 
-	double	t_best;
-	int		hit_type;
+	double			t_best;
+	int				hit_type;
 
-	double	q0;
-	double	q1;
-	double	q2;
-	double	q3;
+	double			q0;
+	double			q1;
+	double			q2;
+	double			q3;
 
 	t_cyl_params	params;
 }	t_cyl_ctx;

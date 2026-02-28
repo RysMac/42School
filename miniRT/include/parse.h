@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:19:16 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/28 18:02:23 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 19:22:46 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,14 @@
 
 # include "scene.h"
 # include "framebuffer.h"
-# include "../libft/libft.h" 
+# include "../libft/libft.h"
 
 typedef struct s_flags
 {
-    int has_a;
-    int has_c;
-    int has_l;
-}   t_flags;
+	int	has_a;
+	int	has_c;
+	int	has_l;
+}	t_flags;
 
 void	parse_file(const char *path, t_scene *scene);
 void	parse_line(char *line, t_scene *scene, t_flags *flags);

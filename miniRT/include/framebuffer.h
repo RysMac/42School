@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:38:40 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/28 18:35:11 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 19:24:29 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 # define M_PI 3.14159265358979323846
 # endif
 
-typedef struct s_cyl_ctx t_cyl_ctx;
+typedef struct s_cyl_ctx	t_cyl_ctx;
 
 typedef struct s_inputdata
 {
@@ -88,22 +88,22 @@ void		obj_plane(t_obj *obj, t_inputdata *inputdata);
 void		obj_cylinder(t_obj *obj, t_inputdata *inputdata);
 
 // cylinderh1
-void	cylinder_basis(const double n[3], double x[3], double y[3]);
-void	cyl_init_ctx(t_cyl_ctx *k, const t_obj *obj);
-void	cyl_build_basis(t_cyl_ctx *k, const t_obj *obj);
-void	cyl_set_local_ray(t_cyl_ctx *k, const t_obj *obj,
-		const t_ray *ray);
-void	cyl_side_accept(t_cyl_ctx *k, double t);
+void		cylinder_basis(const double n[3], double x[3], double y[3]);
+void		cyl_init_ctx(t_cyl_ctx *k, const t_obj *obj);
+void		cyl_build_basis(t_cyl_ctx *k, const t_obj *obj);
+void		cyl_set_local_ray(t_cyl_ctx *k, const t_obj *obj,
+				const t_ray *ray);
+void		cyl_side_accept(t_cyl_ctx *k, double t);
 // cylinderh2
-void	cyl_intersect_side(t_cyl_ctx *k);
-void	cyl_cap_accept(t_cyl_ctx *k, double t, int top);
-void	cyl_intersect_caps(t_cyl_ctx *k);
-void	cyl_choose_best(t_cyl_ctx *k);
-void	cyl_compute_local_pn(t_cyl_ctx *k);
+void		cyl_intersect_side(t_cyl_ctx *k);
+void		cyl_cap_accept(t_cyl_ctx *k, double t, int top);
+void		cyl_intersect_caps(t_cyl_ctx *k);
+void		cyl_choose_best(t_cyl_ctx *k);
+void		cyl_compute_local_pn(t_cyl_ctx *k);
 // vector calculus
-void	vec_sub(const double a[3], const double b[3], double out[3]);
-double	vec_dot(const double a[3], const double b[3]);
-double	vec_len(const double v[3]);
-void	vec_scale(const double v[3], double s, double out[3]);
-void	vec_clamp01(double v[3]);
+void		vec_sub(const double a[3], const double b[3], double out[3]);
+double		vec_dot(const double a[3], const double b[3]);
+double		vec_len(const double v[3]);
+void		vec_scale(const double v[3], double s, double out[3]);
+void		vec_clamp01(double v[3]);
 #endif

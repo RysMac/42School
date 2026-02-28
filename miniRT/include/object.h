@@ -36,7 +36,8 @@ typedef struct s_hit
 	const t_obj	*obj;
 }	t_hit;
 
-typedef int	(*t_intersect_fn)(const t_obj *self, const t_ray *ray, t_hit *hit);
+// typedef int	(*t_intersect_fn)(const t_obj *self,
+		//  const t_ray *ray, t_hit *hit);
 
 // object type
 typedef enum s_obj_type
@@ -85,6 +86,7 @@ typedef struct s_obj
 	t_obj_type		type;
 	t_obj_pos		pos;
 	t_shape_data	shape;
-	t_intersect_fn	intersect;
+	int				(*intersect)(const struct s_obj *self,
+			const t_ray *ray, t_hit *hit);
 	double			albedo[3];
 }	t_obj;

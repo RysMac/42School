@@ -36,9 +36,16 @@ double	vnorm3(const double v[3])
 
 void	vnormalize3(const double v[3], double vnrm[3])
 {
+	double	a0;
+	double	a1;
+	double	a2;
 	double	nrm;
+	double	inv;
 
-	nrm = vnorm3(v);
+	a0 = v[0];
+	a1 = v[1];
+	a2 = v[2];
+	nrm = sqrt(a0 * a0 + a1 * a1 + a2 * a2);
 	if (nrm == 0.0)
 	{
 		vnrm[0] = 0.0;
@@ -46,9 +53,10 @@ void	vnormalize3(const double v[3], double vnrm[3])
 		vnrm[2] = 0.0;
 		return ;
 	}
-	vnrm[0] = v[0] / nrm;
-	vnrm[1] = v[1] / nrm;
-	vnrm[2] = v[2] / nrm;
+	inv = 1.0 / nrm;
+	vnrm[0] = a0 * inv;
+	vnrm[1] = a1 * inv;
+	vnrm[2] = a2 * inv;
 }
 
 void	cross3(const double a[3], const double b[3], double result[3])
