@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/27 11:56:57 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/27 12:15:11 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 18:35:25 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,15 @@ void	cyl_set_local_ray(t_cyl_ctx *k, const t_obj *obj,
 		const t_ray *ray)
 {
 	double	o[3];
+	t_vec3	v;
 
 	o[0] = ray->o[0] - obj->pos.pos[0];
 	o[1] = ray->o[1] - obj->pos.pos[1];
 	o[2] = ray->o[2] - obj->pos.pos[2];
-	rv(o, k->x, k->y, obj->pos.dir, k->c);
-	rv(ray->d, k->x, k->y, obj->pos.dir, k->d);
+	v = rv(o, k->x, k->y, obj->pos.dir);
+	vcopy3(v, k->c);
+	v = rv(ray->d, k->x, k->y, obj->pos.dir);
+	vcopy3(v, k->d);
 }
 
 /* Height-clip a candidate side hit and store nearest valid one. */

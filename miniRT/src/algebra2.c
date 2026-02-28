@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 12:10:10 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/27 12:21:55 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 18:39:10 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,26 +18,31 @@
 // projection on x'
 // projection on y'
 // projection on z'
-void	rv(const double vin[3], const double x[3],
-			const double y[3], const double z[3], double vout[3])
+t_vec3	rv(const double vin[3], const double x[3],
+			const double y[3], const double z[3])
 {
-	vout[0] = vdotn(x, vin, 3);
-	vout[1] = vdotn(y, vin, 3);
-	vout[2] = vdotn(z, vin, 3);
+	t_vec3	vout;
+
+	vout.v[0] = vdotn(x, vin, 3);
+	vout.v[1] = vdotn(y, vin, 3);
+	vout.v[2] = vdotn(z, vin, 3);
+	return (vout);
 }
 
 // inverse: v = R^T v'  (local -> world)
 // vin -> local coords
 // vout -> world coords
-void	rv_inv(const double vin[3],
+t_vec3	rv_inv(const double vin[3],
 			const double x[3],
 			const double y[3],
-			const double z[3],
-			double vout[3])
+			const double z[3])
 {
-	vout[0] = vin[0] * x[0] + vin[1] * y[0] + vin[2] * z[0];
-	vout[1] = vin[0] * x[1] + vin[1] * y[1] + vin[2] * z[1];
-	vout[2] = vin[0] * x[2] + vin[1] * y[2] + vin[2] * z[2];
+	t_vec3	vout;
+
+	vout.v[0] = vin[0] * x[0] + vin[1] * y[0] + vin[2] * z[0];
+	vout.v[1] = vin[0] * x[1] + vin[1] * y[1] + vin[2] * z[1];
+	vout.v[2] = vin[0] * x[2] + vin[1] * y[2] + vin[2] * z[2];
+	return (vout);
 }
 
 void	rotate_x(double v[3], double theta)

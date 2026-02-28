@@ -21,8 +21,8 @@ int main(int argc, char **argv)
 	data.bpp = 0;
 	data.line_len = 0;
 	data.endian = 0;
-	data.w = 800;
-	data.h = 600;
+	data.w = 1000;
+	data.h = 1000;
 	data.scene.camera.w = &data.w;
 	data.scene.camera.h = &data.h;
 

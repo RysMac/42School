@@ -16,8 +16,8 @@
 /* Transform local point/normal back to world space and normalize normal. */
 static void	cyl_local_to_world(t_cyl_ctx *k, const t_obj *obj)
 {
-	rv_inv(k->p_local, k->x, k->y, obj->pos.dir, k->p_world);
-	rv_inv(k->n_local, k->x, k->y, obj->pos.dir, k->n_world);
+	vcopy3(rv_inv(k->p_local, k->x, k->y, obj->pos.dir), k->p_world);
+	vcopy3(rv_inv(k->n_local, k->x, k->y, obj->pos.dir), k->n_world);
 	vnormalize3(k->n_world, k->n_world);
 	k->p_world[0] += obj->pos.pos[0];
 	k->p_world[1] += obj->pos.pos[1];

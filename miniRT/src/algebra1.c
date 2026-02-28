@@ -12,6 +12,7 @@
 
 #include <math.h>
 #include <stddef.h>
+#include "../include/object.h"
 
 double	vdotn(const double v1[3], const double v2[3], size_t n)
 {
@@ -55,4 +56,11 @@ void	cross3(const double a[3], const double b[3], double result[3])
 	result[0] = a[1] * b[2] - a[2] * b[1];
 	result[1] = a[2] * b[0] - a[0] * b[2];
 	result[2] = a[0] * b[1] - a[1] * b[0];
+}
+
+void	vcopy3(const t_vec3 vin, double vout[3])
+{
+	vout[0] = vin.v[0];
+	vout[1] = vin.v[1];
+	vout[2] = vin.v[2];
 }

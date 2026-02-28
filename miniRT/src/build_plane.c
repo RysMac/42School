@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 12:52:10 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/24 12:52:12 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 18:39:35 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,8 @@ static int	find_t(const t_obj *obj, const t_ray *ray, t_hit *hit, double *t)
 	o[0] = ray->o[0] - obj->pos.pos[0];
 	o[1] = ray->o[1] - obj->pos.pos[1];
 	o[2] = ray->o[2] - obj->pos.pos[2];
-	rv(o, x, y, obj->pos.dir, c);
-	rv(ray->d, x, y, obj->pos.dir, d);
+	vcopy3(rv(o, x, y, obj->pos.dir), c);
+	vcopy3(rv(ray->d, x, y, obj->pos.dir), d);
 	if (fabs(d[2]) < 1e-8)
 		return (0);
 	else
@@ -82,7 +82,7 @@ static int	intersect_plane(const t_obj *obj, const t_ray *ray, t_hit *hit)
 	plane_basis(obj->pos.dir, x, y);
 	if (find_t(obj, ray, hit, &t) == 0)
 		return (0);
-	rv_inv(hit->p, x, y, obj->pos.dir, hit->p);
+	vcopy3(rv_inv(hit->p, x, y, obj->pos.dir), hit->p);
 	hit->obj = obj;
 	hit->p[0] = obj->pos.pos[0] + hit->p[0];
 	hit->p[1] = obj->pos.pos[1] + hit->p[1];

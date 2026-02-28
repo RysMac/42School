@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:38:40 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/28 17:41:14 by mrys             ###   ########.fr       */
+/*   Updated: 2026/02/28 18:35:11 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,13 +54,14 @@ double		vdotn(const double v1[3], const double v2[3], size_t n);
 double		vnorm3(const double v[3]);
 void		vnormalize3(const double v[3], double vnrm[3]);
 void		cross3(const double a[3], const double b[3], double result[3]);
-void		rv(const double vin[3], const double x[3], const double y[3],
-				const double z[3], double vout[3]);
-void		rv_inv(const double vin[3], const double x[3], const double y[3],
-				const double z[3], double vout[3]);
+t_vec3		rv(const double vin[3], const double x[3], const double y[3],
+				const double z[3]);
+t_vec3		rv_inv(const double vin[3], const double x[3], const double y[3],
+				const double z[3]);
 void		rotate_x(double v[3], double theta);
 void		rotate_y(double v[3], double theta);
 void		rotate_z(double v[3], double theta);
+void		vcopy3(const t_vec3 vin, double vout[3]);
 
 // helper1.c
 void		point(const double o[3], const double d[3],
