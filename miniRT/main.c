@@ -3,12 +3,12 @@
 #include "framebuffer.h"
 #include "miniRT.h"
 
-double print_vector3(const double v[3])
-{
-	for (int i = 0; i < 3; i++)
-		printf(" %f ", v[i]);
-	printf("\n");
-}
+// double print_vector3(const double v[3])
+// {
+// 	for (int i = 0; i < 3; i++)
+// 		printf(" %f ", v[i]);
+// 	printf("\n");
+// }
 
 int main(int argc, char **argv)
 {
