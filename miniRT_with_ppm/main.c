@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 		exit_error("Usage: ./miniRT scene.rt");
 	parse_file(argv[1], &data.scene); // add here sizes w, h
 
-	if (fb_init(&data.fb_ppm, w, h)) // fb size based on camera w, h
+	if (fb_init(&fb_ppm, w, h)) // fb size based on camera w, h
 		return (1);
 	// data.fb_ppm = fb_ppm; 
 	coloring_object(&data);
