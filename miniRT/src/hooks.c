@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 12:21:48 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/27 14:42:36 by mrys             ###   ########.fr       */
+/*   Updated: 2026/03/03 11:25:57 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,11 @@ void	init_and_render(t_data *data)
 			&data->line_len, &data->endian);
 	if (!data->addr)
 		exit_error("mlx_get_data_addr failed");
-	fb_init(&data->fb, data->w, data->h);
+	data->fb.w = data->w;
+	data->fb.h = data->h;
+	data->fb.data = (uint8_t *)data->addr;
+	// frame.c file is not needed anymore?
+	// fb_init(&data->fb, data->w, data->h);
 	data->fb.data = (uint8_t *)data->addr;
 	coloring_object_mlx(data);
 	mlx_put_image_to_window(data->mlx, data->win, data->img, 0, 0);

@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 12:37:39 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/28 18:35:18 by mrys             ###   ########.fr       */
+/*   Updated: 2026/03/03 11:07:19 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ void	add_object(t_scene *scene, t_obj *obj)
 	free(scene->objects);
 	scene->objects = new;
 	scene->count++;
-	printf("new object added\n");
 }
 
 void	ft_free_tab(char **tab)

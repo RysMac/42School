@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 12:42:26 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/27 14:52:23 by mrys             ###   ########.fr       */
+/*   Updated: 2026/03/03 12:56:07 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,11 @@
 // ft_bzero(&scene->camera, sizeof(t_camera)); - deleted
 static void	init_scene(t_scene *scene)
 {
-	ft_bzero(&scene->ambient, sizeof(t_ambient));
-	ft_bzero(&scene->light, sizeof(t_light));
+	// ft_bzero(&scene->ambient, sizeof(t_ambient));
+	// ft_bzero(&scene->light, sizeof(t_light));
+	// ft_bzero(&scene->camera, sizeof(t_camera));
+	// scene->w = 800;
+	// scene->h = 100;
 	scene->objects = NULL;
 	scene->count = 0;
 }

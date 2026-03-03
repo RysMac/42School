@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:23:54 by mrys              #+#    #+#             */
-/*   Updated: 2026/02/28 19:21:52 by mrys             ###   ########.fr       */
+/*   Updated: 2026/03/03 13:06:34 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@
 # include "scene.h"
 # include "../minilibx-linux/mlx.h"
 
-// # define WIDTH 800
-// # define HEIGHT 600
 # define ESC_KEY 65307
 
 typedef struct s_data
