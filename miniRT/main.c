@@ -14,8 +14,8 @@ int main(int argc, char **argv)
 	data.bpp = 0;
 	data.line_len = 0;
 	data.endian = 0;
-	data.w = 100;
-	data.h = 50;
+	data.w = 800;
+	data.h = 500;
 	data.scene.w = data.w;
 	data.scene.h = data.h;
 	data.scene.camera.w = &data.w;
@@ -28,9 +28,6 @@ int main(int argc, char **argv)
 	init_and_render(&data);
 	// mlx_key_hook(data.win, key_hook, &data);
 	// mlx_hook(data.win, 17, 0, close_hook, &data);
-	printf("data w,h, %d  %d \n", data.w, data.h);
-	printf("camera w,h, %i  %i \n", *data.scene.camera.w , *data.scene.camera.h);
-	printf("fb w,h, %ld  %ld \n", data.fb.w, data.fb.h);
 	mlx_loop(data.mlx);
 	
 	return (0);
