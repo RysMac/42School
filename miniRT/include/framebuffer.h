@@ -6,7 +6,7 @@
 /*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 11:38:40 by mrys              #+#    #+#             */
-/*   Updated: 2026/03/03 11:56:59 by mrys             ###   ########.fr       */
+/*   Updated: 2026/03/05 13:23:07 by mrys             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,7 @@
 # include "object.h"
 # include "framebuffer.h"
 
-# ifndef M_PI
 # define M_PI 3.14159265358979323846
-# endif
 
 typedef struct s_cyl_ctx	t_cyl_ctx;
 

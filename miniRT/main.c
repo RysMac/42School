@@ -24,7 +24,9 @@ int main(int argc, char **argv)
 	if (argc != 2)
 		exit_error("Usage: ./miniRT scene.rt");
 	parse_file(argv[1], &data.scene);
-
+	printf("n objects: %ld\n", data.scene.count);
+	if ( data.scene.count == 0)
+		exit(1);
 	init_and_render(&data);
 	// mlx_key_hook(data.win, key_hook, &data);
 	// mlx_hook(data.win, 17, 0, close_hook, &data);
