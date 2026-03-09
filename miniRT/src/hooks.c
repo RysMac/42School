@@ -1,7 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   hooks.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/22 12:21:48 by mrys              #+#    #+#             */
+/*   Updated: 2026/03/03 11:25:57 by mrys             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "miniRT.h"
 #include <stdlib.h>
-# include "../minilibx-linux/mlx.h"
+#include "../minilibx-linux/mlx.h"
 
+// there should not be fb_free(&data->fb);
 void	cleanup(t_data *data)
 {
 	if (data->img)
@@ -10,7 +23,6 @@ void	cleanup(t_data *data)
 		mlx_destroy_window(data->mlx, data->win);
 	if (data->mlx)
 		free(data->mlx);
-	// fb_free(&data->fb);
 	free(data->scene.objects);
 	exit(0);
 }
@@ -33,30 +45,24 @@ void	init_and_render(t_data *data)
 	data->mlx = mlx_init();
 	if (!data->mlx)
 		exit_error("mlx_init failed");
-
-	data->win = mlx_new_window(data->mlx, WIDTH, HEIGHT, "miniRT");
+	data->win = mlx_new_window(data->mlx, data->w, data->h, "miniRT");
 	if (!data->win)
 		exit_error("mlx_new_window failed");
-
-	data->img = mlx_new_image(data->mlx, WIDTH, HEIGHT);
+	data->img = mlx_new_image(data->mlx, data->w, data->h);
 	if (!data->img)
 		exit_error("mlx_new_image failed");
-
 	data->addr = mlx_get_data_addr(data->img, &data->bpp,
-	                               &data->line_len, &data->endian);
+			&data->line_len, &data->endian);
 	if (!data->addr)
 		exit_error("mlx_get_data_addr failed");
-
-	fb_init(&data->fb, WIDTH, HEIGHT);
-	data->fb.data = (uint8_t *)data->addr;   // Podpięcie bufora MLX – MUSI być TU
-
-	coloring_object_mlx(&data->fb, &data->scene.camera,
-					&data->scene, data->bpp,
-					data->line_len, data->endian);
-
+	data->fb.w = data->w;
+	data->fb.h = data->h;
+	data->fb.data = (uint8_t *)data->addr;
+	// frame.c file is not needed anymore?
+	// fb_init(&data->fb, data->w, data->h);
+	data->fb.data = (uint8_t *)data->addr;
+	coloring_object_mlx(data);
 	mlx_put_image_to_window(data->mlx, data->win, data->img, 0, 0);
-
-	// Hooki
 	mlx_key_hook(data->win, key_hook, data);
-	mlx_hook(data->win, 17, 0, close_hook, data);   // zamykanie okna (X)
+	mlx_hook(data->win, 17, 0, close_hook, data);
 }

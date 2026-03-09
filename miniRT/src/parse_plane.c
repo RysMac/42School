@@ -1,5 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_plane.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mrys <mrys@student.42warsaw.pl>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/22 12:34:25 by mrys              #+#    #+#             */
+/*   Updated: 2026/02/27 14:28:10 by mrys             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "parse.h"
 
+// be carefull input is normalized
 void	parse_plane(char **s, t_scene *scene)
 {
 	t_inputdata	in;
@@ -14,6 +27,7 @@ void	parse_plane(char **s, t_scene *scene)
 	ft_bzero(&in, sizeof(in));
 	parse_vec3(s[1], in.pos);
 	parse_vec3(s[2], in.ndir);
+	vnormalize3(in.ndir, in.ndir);
 	if (!is_normalized(in.ndir))
 		exit_error("Plane normal not normalized");
 	parse_color(s[3], in.albedo);
