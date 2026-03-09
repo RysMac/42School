@@ -2,7 +2,7 @@ NAME    := claptrap
 CXX     := c++
 CXXFLAGS:= -Wall -Wextra -Werror -std=c++98
 
-SRCS    := main.cpp Animal.cpp Dog.cpp
+SRCS    := main.cpp Animal.cpp Dog.cpp Cat.cpp WrongAnimal.cpp WrongCat.cpp
 OBJS    := $(SRCS:.cpp=.o)
 
 all: $(NAME)
@@ -10,7 +10,7 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
 
-%.o: %.cpp ClapTrap.hpp
+%.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:

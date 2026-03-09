@@ -4,18 +4,18 @@
 
 Animal::Animal() : _type("Animal")
 {
-	std::cout << _type << " constructor\n";
+	std::cout << "Animal constructor\n";
 }
 
 Animal::Animal(std::string type) : _type(type)
 {
-	std::cout << _type << " constructor\n";
+	std::cout << "Animal constructor\n";
 }
 
 Animal::Animal(const Animal& other)
 {
 	this->_type = other._type;
-	std::cout << _type << " copy constructor called\n";
+	std::cout << "Animal copy constructor called\n";
 
 }
 
@@ -25,14 +25,14 @@ Animal& Animal::operator=(const Animal& other)
 	{
 		this->_type = other._type;
 	}
-	std::cout << _type << " copy assign. op. called\n";
+	std::cout << "Animal copy assign. op. called\n";
 
 	return *this;
 }
 
 Animal::~Animal()
 {
-	std::cout << _type << " destructed\n";
+	std::cout << "Animal destructed\n";
 }
 
 const std::string& Animal::getType() const
@@ -40,7 +40,7 @@ const std::string& Animal::getType() const
 	return _type;
 }
 
-void Animal::makeSound()
+void Animal::makeSound() const
 {
-	std::cout << _type << " has undefined sound\n";
+	std::cout << "Animal has undefined sound\n";
 }
