@@ -1,11 +1,12 @@
 #include "IMateriaSource.hpp"
 
-
+#include "Ice.hpp"
 
 int main()
 {
 
-    IMateriaSource* src = new MateriaSource();
+    Ice ice;
+	ice.getType();
 
     return 0;
 }
