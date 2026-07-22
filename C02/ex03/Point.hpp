@@ -5,12 +5,11 @@
 
 class Point {
 private:
-	Fixed const	x;
-	Fixed const	y;
+	Fixed const	_x;
+	Fixed const	_y;
 public:
 	Point();
-	Point(const float a, const float b);
-	Point(const Fixed& p1, const Fixed& p2);
+	Point(const float x, const float y);
 	Point(const Point& other);
 	~Point();
 
@@ -21,7 +20,6 @@ public:
 
 };
 
-Fixed	cross(const Point& p1, const Point& p2);
 bool	bsp(Point const a, Point const b, Point const c, Point const point);
 
 #endif

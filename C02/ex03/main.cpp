@@ -4,13 +4,16 @@
 
 int	main() {
 
-	Point	p1(2.455555,2.256666);
-	Point	p2(6, 9);
+	Point	p1(-1.5, -1.5);
+	Point	p2(1.5, -1.5);
+	Point	p3(0.0, 1.5);
 
-	std::cout << "Point p1 = " << p1.getX() << std::endl;
-	std::cout << "Point p2 = " << p1.getY() << std::endl;
+	Point	point1(0., 0.); // inside
+	Point	point2(10., 0.); // outside
+	Point	point3(0, 1.5); // on corner
 
-	std::cout << cross(p1, p2) << std::endl;
-	std::cout << bsp(p1, p2, p1, p2) << std::endl;
+	std::cout << "inside?: " << bsp(p1, p2, p3, point1) << std::endl;
+	std::cout << "outside?: " << bsp(p1, p2, p3, point2) << std::endl;
+	std::cout << "on a vertex: " << bsp(p1, p2, p3, point3) << std::endl;
 	return 0;
 }
