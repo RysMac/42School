@@ -8,7 +8,6 @@ Bureaucrat::Bureaucrat(const std::string& name, int grade)
 	: _name(name),
 	  _grade(grade)
 	{
-		// is this executed before aboe _name(name) and grade(grade) ??
 		checkGrade(grade);
 	}
 

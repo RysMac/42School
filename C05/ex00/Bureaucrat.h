@@ -21,14 +21,12 @@ public:
 	void	increment();
 	void	decrement();
 
-	// does these two must be in public or can be also in private - we do not use them outside class
-	// does these two must be as nested class? - yes because of spec
 	class GradeTooHighException : public std::exception
 	{
 		public:
-			virtual const char* what() const throw(); // what is throw??
+			virtual const char* what() const throw();
 	};
-	class GradeTooLowException : public std::exception // why public ? because we use exception outside its own?
+	class GradeTooLowException : public std::exception
 	{
 		public:
 			virtual const char* what() const throw();
