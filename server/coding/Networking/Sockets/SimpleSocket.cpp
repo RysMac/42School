@@ -1,4 +1,5 @@
 #include "SimpleSocket.hpp"
+#include <cstdlib>
 
 HDE::SimpleSocket::SimpleSocket(int domain, int service, int protocol, int port, u_long interface)
 {
