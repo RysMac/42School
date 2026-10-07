@@ -1,4 +1,7 @@
-#include <iostream>
+#ifndef CONTACT_HPP
+# define CONTACT_HPP
+
+#include <string>
 
 class Contact {
 private:
@@ -20,3 +23,5 @@ public:
 	void	set_phone_nbr(std::string phone_nbr);
 	void	set_secret(std::string darkest_secret);
 };
+
+#endif
