@@ -4,6 +4,7 @@ CXX			= c++
 CXXFLAGS	= -Wall -Wextra -Werror -std=c++98
 
 SRCS		= src/net/ListenSocket.cpp\
+			  src/core/ServerManager.cpp\
 			  src/main.cpp
 
 OBJS		= $(SRCS:.cpp=.o)
