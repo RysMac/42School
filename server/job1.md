@@ -1,6 +1,6 @@
 # Job 1 — Clean up & restructure the base (Oct 7, ~3.5h)
 
-## ▶ Progress (saved Oct 9) — resume here: step 4 (poll)
+## ▶ Progress (saved Oct 10) — job1 DONE; next: Week 1 Oct 16–17 (Client buffers)
 Code lives in `coding/webserv/` (not `server/webserv/` as planned below; fine, just be consistent).
 
 **Done**
@@ -27,10 +27,21 @@ Code lives in `coding/webserv/` (not `server/webserv/` as planned below; fine, j
   - Members by value (RAII) → no try/catch needed.
   - vector: `reserve` vs `resize`, `clear()` doesn't delete pointees, `const_iterator` is read-only.
 
-**Next (in this order)**
-1. **Commit** steps 1–3 + Makefile (`git add` sources, Makefile, `.gitignore`).
-2. Optional leftovers: `git rm --cached coding/hdelibc_test coding/Networking/Servers/test`. Remove the debug text `"  <- end of e msg"` from `main.cpp`.
-3. **Step 4 (poll).** Opening question, answer it in your own words before coding: what are the 3 fields of `struct pollfd` (`fd`, `events`, `revents`), and who writes each one? How do you build a `std::vector<pollfd>` from `_sockets`? How do you tell a listen fd from a client fd when `poll()` returns?
+**Done offline Oct 9 evening (uncommitted, reviewed Oct 10)**
+- Commit of steps 1–3 + Makefile = `2e71a27`.
+- Step 4, items 1–3: `_pfds` + `addPfd()` (listen fds first), `run()` loops on `poll(-1)`, POLLIN on listen → `accept` + O_NONBLOCK + add; POLLIN on client → `recv` once, print, `<= 0` → close + swap-with-last + `pop_back`. Builds with -Werror; tested with curl/nc (request printed; curl times out because nothing is sent yet).
+
+**Done Oct 10**
+- Step 4 complete: loop bugs fixed (error check first, client-only; removal always ends the branch), POLLOUT switch + fixed `200 OK` (ostringstream, Content-Length, `Connection: close`), close after send either way, `MSG_NOSIGNAL` on send.
+- Step 5: `make re` clean, no relink; curl 200 on 8080/8081/8082; 100 parallel curls → still alive, 6 fds (3 std + 3 listen).
+- Leftover binaries untracked; committed.
+
+**Open TODOs (in the code)**
+- `delClient()` helper: the close/swap/pop/--i block is repeated 4×.
+- Partial send → per-client out-buffer (Oct 16–17).
+- Replace `MSG_NOSIGNAL` by `signal(SIGPIPE, SIG_IGN)` in `main` before CGI pipes (Week 3).
+- `throw` on `poll() < 0` kills the server; `~ServerManager` doesn't close client fds; `-1` timeout until the timeouts week; `memset` not needed.
+- `makeTestConfig()` stub from PLAN Oct 10–11 not written yet.
 
 Goal: replace the blocking tutorial server in `coding/` with a clean, C++98-compliant base for `webserv`.
 Steps 1–3 are the must-do; step 4 is a bonus (gets you ahead on Week 1).
@@ -48,7 +59,7 @@ server/
       core/ServerManager.hpp/.cpp
     conf/default.conf   # empty for now
 ```
-- [~] Remove tracked `.o` files and binaries (`webserv` done; `hdelibc_test`, `Servers/test` still tracked).
+- [x] Remove tracked `.o` files and binaries.
 
 ## 2. Merge the 3 socket classes into one `ListenSocket` (≈60 min) — [x]
 `SimpleSocket → BindingSocket → ListeningSocket` is three classes doing one job, and `ConnectingSocket` isn't needed. One class is enough:
@@ -80,21 +91,21 @@ Fixes to make while you write it:
 - [x] Objects in `obj/` + `-MMD -MP`, so changing a header triggers a rebuild but nothing relinks without a reason.
 - [x] Check: running `make` twice prints "Nothing to be done" the second time.
 
-## 4. First real `poll()` loop (≈70 min, bonus) — [ ]
+## 4. First real `poll()` loop (≈70 min, bonus) — [x]
 In `ServerManager`, just enough to replace `TestServer`:
-- [ ] `std::vector<pollfd>`; one `ListenSocket` each for ports 8080 and 8081 (hard-coded, marked `// STUB`).
-- [ ] Loop on `poll()`. POLLIN on a listen fd → `accept()`, make the client fd non-blocking, add it with POLLIN.
-- [ ] POLLIN on a client fd → `recv()` once and print it. Result `<= 0` → close the fd and remove it. Don't check `errno`.
-- [ ] Send only after POLLOUT: when the request has arrived, switch that fd's events to POLLOUT, then `send` a fixed `HTTP/1.1 200 OK` response and close.
+- [x] `std::vector<pollfd>`; one `ListenSocket` each for ports 8080 and 8081 (hard-coded, marked `// STUB`).
+- [x] Loop on `poll()`. POLLIN on a listen fd → `accept()`, make the client fd non-blocking, add it with POLLIN.
+- [x] POLLIN on a client fd → `recv()` once and print it. Result `<= 0` → close the fd and remove it. Don't check `errno`.
+- [x] Send only after POLLOUT: when the request has arrived, switch that fd's events to POLLOUT, then `send` a fixed `HTTP/1.1 200 OK` response and close.
 
-## 5. Check & commit (≈20 min) — [ ]
+## 5. Check & commit (≈20 min) — [x]
 ```bash
 make re && ./webserv
 curl -v localhost:8080 ; curl -v localhost:8081
 for i in $(seq 100); do curl -s localhost:8080 & done; wait   # must not crash
 ```
-- [ ] Commit.
-- [ ] Tick the Week 0 Makefile/C++98 box in `PLAN.md` (plus the Oct 12–15 boxes if step 4 is done).
+- [x] Commit.
+- [x] Tick the Week 0 Makefile/C++98 box in `PLAN.md` (plus the Oct 12–15 boxes if step 4 is done).
 
 ---
 Write the code yourself (the subject's AI rules: you must be able to explain it at the defense). Afterwards, ask Claude to review it for poll-rule violations and C++98 problems.

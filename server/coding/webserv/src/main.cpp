@@ -14,13 +14,11 @@ int main()
 		ports.push_back(8082);
 		
 		ServerManager server(ports);
-
-		pause();
-
+		server.run();
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << "Error: " << e.what() << "  <- end of e msg\n";
+		std::cerr << "Error: " << e.what() << "\n";
 		return 1;
 	}
 		

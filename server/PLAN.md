@@ -48,15 +48,15 @@ Key rule: every `recv/send/read/write` on a socket or pipe happens **only** afte
 |---|---|---|
 | Oct 8 | Read RFC 1945 / 7230-7231 basics (request line, headers, status codes, chunked). Play with `telnet`/`curl -v` against NGINX (`docker run -p 8081:80 nginx`). | [ ] |
 | Oct 9 | With partner: agree on interface headers + git flow (branch per track). | [ ] |
-| Oct 10–11 | New repo layout + root `Makefile` (NAME=webserv, all/clean/fclean/re, `-Wall -Wextra -Werror -std=c++98`, no relink). Fix the C++98 errors above. Write `makeTestConfig()` stub. | [ ] |
+| Oct 10–11 | New repo layout + root `Makefile` (NAME=webserv, all/clean/fclean/re, `-Wall -Wextra -Werror -std=c++98`, no relink). Fix the C++98 errors above. Write `makeTestConfig()` stub. | [x] (stub pending) |
 
 ✅ Milestone: `make` builds `webserv` cleanly with C++98 flags.
 
 ### Week 1 — Oct 12–18: Event loop (+ config parser on B)
 | Days | Me (A) | Partner (B) | If alone / B late | Done |
 |---|---|---|---|---|
-| Oct 12–13 | Refactor sockets → `ListenSocket` (REUSEADDR, O_NONBLOCK, exceptions, OCF). | Lexer: tokens, `{ } ;`, comments. | keep using stub config | [ ] |
-| Oct 14–15 | `ServerManager`: one `poll()` over N listen fds; accept → non-blocking client fd → add to pollfd vector. | Parser: `server{ listen, server_name, error_page, client_max_body_size, location{...} }`. | — | [ ] |
+| Oct 12–13 | Refactor sockets → `ListenSocket` (REUSEADDR, O_NONBLOCK, exceptions, OCF). | Lexer: tokens, `{ } ;`, comments. | keep using stub config | [x] |
+| Oct 14–15 | `ServerManager`: one `poll()` over N listen fds; accept → non-blocking client fd → add to pollfd vector. | Parser: `server{ listen, server_name, error_page, client_max_body_size, location{...} }`. | — | [x] (A part) |
 | Oct 16–17 | Client read/write buffers, POLLIN/POLLOUT switching, close on 0/-1, remove from poll. Hard-coded "Hello" response. | `location` directives: `methods`, `return`, `root`, `autoindex`, `index`, `upload_store`, `cgi`. Validation. | — | [ ] |
 | Oct 18 | Merge; `main` loads config and opens every `listen` port. | | | [ ] |
 
