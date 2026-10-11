@@ -1,6 +1,6 @@
 # Job 1 — Clean up & restructure the base (Oct 7, ~3.5h)
 
-## ▶ Progress (saved Oct 10) — job1 DONE; next: Week 1 Oct 16–17 (Client buffers)
+## ▶ Progress (saved Oct 10) — job1 DONE; continue in `job2.md`
 Code lives in `coding/webserv/` (not `server/webserv/` as planned below; fine, just be consistent).
 
 **Done**
