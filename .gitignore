@@ -36,3 +36,6 @@ push-swap/checker_linux
 push-swap/push_swap
 threads/
 server_practice/
+Networking/
+hdelibc*
+server/coding/Makefile
