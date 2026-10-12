@@ -8,6 +8,7 @@ SRCDIR		= src
 OBJDIR		= obj
 
 SRCS		= src/net/ListenSocket.cpp\
+			  src/net/Client.cpp\
 			  src/core/ServerManager.cpp\
 			  src/main.cpp
 

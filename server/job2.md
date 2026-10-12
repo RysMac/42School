@@ -1,6 +1,10 @@
 # Job 2 — Client buffers & partial I/O (PLAN: Week 1, Oct 16–18, ~4h)
 
-## ▶ Progress — not started. Resume at step 0.
+## ▶ Progress (Oct 12) — step 1 coded, resume at step 2.
+- Step 0 answered (in chat, not yet written below). Q1 fix: no recv flag. TCP is a byte stream, so the headers end at `\r\n\r\n` and you keep appending to `_in` until it shows up. Q2 OK (also remember `_sent`; `out` must outlive one pass). Q3: concrete list = fd, `_in`, `_out`, `_sent` (+ later state, last-activity, parsed request).
+- Step 1: `delClient(size_t i)` done + backwards loop (no `--i`). Still to do: run the step-1 test, delete the stray commented `current_size` line (has a weird Unicode char), update the outdated "move on with current i" comments.
+- Decisions: **`~Client` closes the fd** (RAII) → disable copying, store `Client*`, `delClient` does `delete` instead of `close` (`ServerManager` closes the fd only before the Client exists, e.g. fcntl fail). **Container: `std::map<int, Client*> _clients`** (key = fd; indices change on swap-with-last, fds don't).
+- Next: write `src/net/Client.hpp` (members + method names from the step-2 skeleton) and get it reviewed before wiring into `run()`. Look up: what `map::find` returns for a missing key, and why `find` is safer than `operator[]`.
 Code lives in `coding/webserv/`. Starting point: commit `493ba36` (job1 done). Open TODOs carried over from job1: `delClient()` helper, partial send, SIGPIPE via `signal()`, `makeTestConfig()` stub.
 
 Goal: right now one `recv` = one request and one `send` = one response. Real clients don't work like that. A request can arrive in many small pieces, and a large response won't fit in one `send`. Give every client its own state (an in-buffer, an out-buffer and a send offset) so the loop can handle **any** split of the data, and still never block.

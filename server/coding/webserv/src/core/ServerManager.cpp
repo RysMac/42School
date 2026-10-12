@@ -63,27 +63,23 @@ void ServerManager::run()
 		int poll_count = poll(&_pfds[0], _pfds.size(), -1); // -1 must be changed acc to spec ?
 
 		if (poll_count < 0) { throw std::runtime_error("poll failed"); }
-		size_t	current_size = _pfds.size();
-		for (size_t i = 0; i < current_size; ++i)
+		// size_t	current_size = _pfds.size();̣
+		for (size_t i = _pfds.size(); i-- > 0; )
 		{
 			if (_pfds[i].revents == 0) continue;
 
-			if (i >= _sockets.size() &&_pfds[i].revents & (POLLERR | POLLHUP)) // this cannot happen to listen sockets right? - POLLERR is possible but rare 
+			if (i >= _sockets.size() &&_pfds[i].revents & (POLLERR | POLLHUP)) // this cannot happen to listen sockets right? - POLLERR is possible but rare
 			{
 				std::cout << "Error from client socket. FD: " << _pfds[i].fd << "\n";
-				close(_pfds[i].fd);
-				if (i != _pfds.size() - 1) _pfds[i] = _pfds.back();
-				_pfds.pop_back();
-				--current_size;
-				--i; // go back one i to inspect already placed one next time
+				delClient(i);
 			}
 			// A. Obsluga gniazda serwera (Nowy Klient)
 			else if ( i < _sockets.size() ) // this must be true only for server_fd
 			{
 				if (_pfds[i].revents & POLLIN)
-				{			
+				{
 					int client_fd = accept(_sockets[i]->getFd(), NULL, NULL);
-					if (client_fd >= 0) 
+					if (client_fd >= 0)
 					{
 						std::cout << "New client connected! FD: " << client_fd << "\n";
 						if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0)
@@ -91,10 +87,7 @@ void ServerManager::run()
 							close(client_fd);
 							continue; // == go to for loop increase ++i and go on
 						}
-						/*  increses vector - should I increase current_size?
-							- no after this we should also continue the for loop and the next poll will check this slot
-						*/  
-						addPfd(client_fd); 
+						addPfd(client_fd);
 						continue;
 					}
 				}
@@ -109,13 +102,7 @@ void ServerManager::run()
 					if (bytes_read <= 0) // this means that recv failed
 					{
 						std::cout << "Client disconnected. FD: " << _pfds[i].fd << "\n";
-						close(_pfds[i].fd);
-						
-						if (i != _pfds.size() - 1)
-							_pfds[i] = _pfds.back(); // replace clsed client space by the last one
-						_pfds.pop_back(); // delete the last element
-						--current_size;
-                        --i;
+						delClient(i);
 						continue; // not needed but clarify waht is next
 					}
 					else
@@ -127,7 +114,7 @@ void ServerManager::run()
 				}
 				else if (_pfds[i].revents & POLLOUT)
 				{
-					const char* body = 
+					const char* body =
 						"<html>"
 						"<body>"
 						"<h1>Hello!</h1>"
@@ -146,26 +133,17 @@ void ServerManager::run()
 					if (send(_pfds[i].fd, out.c_str(), out.size(), MSG_NOSIGNAL) <= 0)
 					{
 						// close -> replace -> move on with current i again
-						close(_pfds[i].fd);
-						if (i != _pfds.size() - 1) _pfds[i] = _pfds.back();
-						_pfds.pop_back();
-						--current_size;
-						--i;
+						delClient(i);
 						continue;
 					}
 					else
 					{
 						// TODO partial send: if send < out.size() keep the rest, don't close
-						// close -> replace -> move on with current i again 
-						// TODO: make a member delClient() later, there are 4 time we are using the same strucutre already
-						close(_pfds[i].fd);
-						if (i != _pfds.size() - 1) _pfds[i] = _pfds.back();
-						_pfds.pop_back();
-						--current_size;
-						--i;
+						// close -> replace -> move on with current i again
+						delClient(i);
 						continue;
 					}
-					
+
 				}
 			}
 		}
@@ -175,8 +153,15 @@ void ServerManager::run()
 void ServerManager::addPfd(int fd)
 {
 	pollfd	pfd;
-	pfd.fd = fd; 
+	pfd.fd = fd;
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 	_pfds.push_back(pfd);
+}
+
+void ServerManager::delClient(size_t i)
+{
+	close(_pfds[i].fd);
+	if (i != _pfds.size() - 1) _pfds[i] = _pfds.back();
+	_pfds.pop_back();
 }

@@ -21,8 +21,9 @@ class ServerManager
 
 	void del_sockets();
 	void addPfd(int fd);
-	
-	
+	void delClient(size_t i);
+
+
 };
 
 #endif // SERVER_MANAGER_HPP
