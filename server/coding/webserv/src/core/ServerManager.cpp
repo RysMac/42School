@@ -1,5 +1,6 @@
 #include "ServerManager.hpp"
 #include "../net/ListenSocket.hpp"
+#include "../net/Client.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -8,6 +9,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <fcntl.h>
+#include <map>
 
 #define BUFFER_SIZE 1024
 
@@ -40,6 +42,7 @@ ServerManager::ServerManager(const std::vector<int>& ports)
 ServerManager::~ServerManager()
 {
 	del_sockets();
+	del_clients();
 }
 
 void ServerManager::del_sockets()
@@ -53,17 +56,24 @@ void ServerManager::del_sockets()
 	_sockets.clear();
 }
 
+void ServerManager::del_clients()
+{
+	std::map<int, Client*>::iterator it;
+	for (it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		delete it->second;
+	}
+	_clients.clear();
+}
+
 void ServerManager::run()
 {
-
-	char buffer[BUFFER_SIZE];
 
 	while (true)
 	{
 		int poll_count = poll(&_pfds[0], _pfds.size(), -1); // -1 must be changed acc to spec ?
 
 		if (poll_count < 0) { throw std::runtime_error("poll failed"); }
-		// size_t	current_size = _pfds.size();̣
 		for (size_t i = _pfds.size(); i-- > 0; )
 		{
 			if (_pfds[i].revents == 0) continue;
@@ -87,8 +97,24 @@ void ServerManager::run()
 							close(client_fd);
 							continue; // == go to for loop increase ++i and go on
 						}
-						addPfd(client_fd);
-						continue;
+						// Client first, then pfd: every fd in _pfds has a Client in _clients
+						try { addClient(client_fd); }
+						catch(...)
+						{
+							std::cerr << "addClient failed, dropping FD: " << client_fd << "\n";
+							continue; // addClient already closed client_fd
+						}
+						try { addPfd(client_fd); }
+						catch(...)
+						{
+							// no pfd exists, so delClient(i) is wrong here (i = listen socket):
+							// remove the Client by fd; ~Client closes client_fd
+							std::cerr << "addPfd failed, dropping FD: " << client_fd << "\n";
+							std::map<int, Client*>::iterator it = _clients.find(client_fd);
+							delete it->second;
+							_clients.erase(it);
+							continue;
+						}
 					}
 				}
 			}
@@ -96,50 +122,47 @@ void ServerManager::run()
 			{
 				if (_pfds[i].revents & POLLIN)
 				{
-					std::memset(buffer, 0, BUFFER_SIZE);
-					ssize_t bytes_read = recv(_pfds[i].fd, buffer, BUFFER_SIZE - 1, 0);
+					char buffer[BUFFER_SIZE];
+					ssize_t bytes_read = recv(_pfds[i].fd, buffer, BUFFER_SIZE, 0);
 
-					if (bytes_read <= 0) // this means that recv failed
+					if (bytes_read > 0)
 					{
-						std::cout << "Client disconnected. FD: " << _pfds[i].fd << "\n";
-						delClient(i);
-						continue; // not needed but clarify waht is next
-					}
-					else
-					{
-						buffer[bytes_read] = '\0';
-						std::cout << "Received from FD: " << _pfds[i].fd << ": " << buffer;
-						_pfds[i].events = POLLOUT;
-					}
-				}
-				else if (_pfds[i].revents & POLLOUT)
-				{
-					const char* body =
-						"<html>"
-						"<body>"
-						"<h1>Hello!</h1>"
-						"</body>"
-						"</html>";
-					std::ostringstream response;
-					response << "HTTP/1.1 200 OK\r\n"
-							<< "Content-Type: text/html\r\n"
-							<< "Content-Length: " << std::strlen(body) << "\r\n"
-							<< "Connection: close\r\n"
-							<< "\r\n"
-							<< body;
+						std::cout << "Received from Client: " << _pfds[i].fd << "\n";
 
-					std::string out = response.str();
-					// TODO: replace MSG_NOSIGNAL by signal(SIGPIPE, SIG_IGN) later
-					if (send(_pfds[i].fd, out.c_str(), out.size(), MSG_NOSIGNAL) <= 0)
-					{
-						// close -> replace -> move on with current i again
+						std::map<int, Client*>::iterator it = _clients.find(_pfds[i].fd);
+						it->second->save_recv(buffer, (size_t)bytes_read);
+						if (it->second->get_recv_done())
+							_pfds[i].events = POLLOUT;
+					}
+					else // this means that recv failed or client disconnected
+					{					
+						std::cout << "Client disconnected or recv failed. FD: " 
+								<< _pfds[i].fd << "\n";
 						delClient(i);
 						continue;
 					}
-					else
+				}
+				else if (_pfds[i].revents & POLLOUT) // we want to send back sth
+				{
+					std::map<int, Client*>::iterator it = _clients.find(_pfds[i].fd);
+
+					// TODO: replace MSG_NOSIGNAL by signal(SIGPIPE, SIG_IGN) later
+					ssize_t s = send(_pfds[i].fd,
+									it->second->data_to_send(),
+									it->second->bytes_to_send(),
+									MSG_NOSIGNAL);
+					if ( s > 0)
 					{
-						// TODO partial send: if send < out.size() keep the rest, don't close
-						// close -> replace -> move on with current i again
+						it->second->add_sent_bytes((size_t)s);
+						if (it->second->get_send_done())
+						{
+							std::cout << "the whole message was sent \n";
+							delClient(i);
+							continue;
+						}
+					}
+					else // send failed
+					{		
 						delClient(i);
 						continue;
 					}
@@ -159,9 +182,40 @@ void ServerManager::addPfd(int fd)
 	_pfds.push_back(pfd);
 }
 
+// Contract: if this throws, everything is already cleaned up (fd closed,
+// no Client in _clients). The caller must not close fd again.
+void ServerManager::addClient(int fd)
+{
+	Client* client = NULL;
+	try
+	{
+		client = new Client(fd); // thanks to this client survives needed timelife
+		_clients.insert(std::make_pair(fd, client));
+	}
+	catch(...)
+	{
+		if (client == NULL)
+			close(fd);       // new failed: no Client exists, nobody else owns fd
+		else
+			delete client;   // insert failed: ~Client closes fd
+		throw;               // both paths must tell the caller it failed
+	}
+}
+
+// TODO: change the name delClient is misleading
 void ServerManager::delClient(size_t i)
 {
-	close(_pfds[i].fd);
+	std::map<int, Client*>::iterator it = _clients.find(_pfds[i].fd);
+	if (it != _clients.end())
+	{
+		delete it->second;
+		_clients.erase(it);
+	}
+	else
+	{
+		close(_pfds[i].fd);
+	}
+
 	if (i != _pfds.size() - 1) _pfds[i] = _pfds.back();
 	_pfds.pop_back();
 }

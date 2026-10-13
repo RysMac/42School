@@ -1,7 +1,7 @@
 NAME		= webserv
 
 CXX			= c++
-CXXFLAGS	= -Wall -Wextra -Werror -std=c++98
+CXXFLAGS	= -Wall -Wextra -Werror -Wsign-conversion -std=c++98
 DEPFLAGS	= -MMD -MP
 
 SRCDIR		= src
