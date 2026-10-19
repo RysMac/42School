@@ -1,6 +1,8 @@
 # Job 2 — Client buffers & partial I/O (PLAN: Week 1, Oct 16–18, ~4h)
 
-## ▶ Progress (Oct 13, end of session): steps 1–5 coded, reviewed and tested. Resume with the clean-up below, commit, then step 6.
+## ▶ Progress (Oct 15): steps 1–5 committed in `aea64b5`. Clean-up is mostly done; leftovers below. Next: step 6.
+- Clean-up leftovers (Oct 15 check): `Client.cpp:26` "latet"; typos in `ServerManager.hpp` comments ("poinrterss", "client d" → "client fd"); trailing whitespace in `main.cpp` (lines 9–27), `Client.hpp:16`, `ServerManager.hpp:24`, `ServerManager.cpp:138,139,165`. `delClient` rename still open (TODO in the code).
+### Oct 13 notes
 - Done (Oct 13): all 6 open fixes from Oct 12. The setters are replaced by behaviour methods: `save_recv(const char*, size_t)` (appends; sets `_recv_done` when `_in` contains `\r\n\r\n`), `add_sent_bytes(n)`, and the `const` questions `data_to_send()`, `bytes_to_send()`, `get_recv_done()`, `get_send_done()` (computed as `_sent == _out.size()`, no flag). POLLIN sets POLLOUT only when the request is complete. POLLOUT sends from `_sent` and removes the client only when everything is sent.
 - Exception safety: accept does `addClient` first, then `addPfd`. `addClient`'s contract: if it throws, it has already cleaned up (fd closed, no Client in the map), so the caller only logs and `continue`s. If `addPfd` throws, the caller removes the Client **by fd** (not `delClient(i)`: there `i` is the listen socket). `delClient` closes the fd itself if no Client is found. Invariant: every client fd in `_pfds` has exactly one Client in `_clients`, so POLLIN/POLLOUT use `find` without an `end()` check.
 - Tests passed: curl 200 on 8080–8082; 100 parallel curls, 6 fds left; a request split into 3 pieces (even `\r` | `\n`) is answered only after the last byte; 5 MB body is sent in 2–3 partial sends with exact size, and a curl on 8081 answers in 0.05 s meanwhile; `bad_alloc` injected before `new`, after `new` and in `addPfd`: only that connection is dropped, same port still answers, no fd leak. (Logging to a file: use `stdbuf -oL ./webserv > log`.)
@@ -85,7 +87,7 @@ While the slow curl runs, a second `curl localhost:8081` must answer immediately
 
 ## 6. Close Week 1 (≈30 min) — [ ]
 - [ ] SIGPIPE: replace `MSG_NOSIGNAL` with `signal(SIGPIPE, SIG_IGN)` in `main`, before `run()` (it also covers the CGI pipes later).
-- [ ] `poll() < 0` currently throws and stops the server. Decide what should happen instead (log and continue?). Hint: `poll` is not `read/write`, so the errno rule is different. Check what the subject says exactly.
+- [x] `poll() < 0` — decided Oct 15: **keep the throw, deferred to PLAN Nov 6** (clean shutdown on SIGINT). Reason: no signal handlers are installed, so EINTR can't happen; the other errors (EFAULT/EINVAL/ENOMEM) are fatal, and log+continue would spin. Per-fd problems never make poll fail, they go to `revents` (POLLERR/POLLHUP/POLLNVAL). The errno ban covers only read/write, not poll. When a SIGINT handler is added (for a clean valgrind exit), handle EINTR there.
 - [ ] `makeTestConfig()` stub (PLAN Oct 10–11 + Oct 18): a function returning hard-coded ports (later: `ServerConfig`s). `main` takes the ports from it instead of the `push_back`s. Mark it `// STUB`.
 - [ ] Check (the Week 1 milestone):
 ```bash

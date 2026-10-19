@@ -18,7 +18,7 @@ class ServerManager
 	ServerManager(const ServerManager&);
 	ServerManager& operator=(const ServerManager&);
 
-	std::vector<ListenSocket*>	_sockets;  // vector of poinrterss bc fd
+	std::vector<ListenSocket*>	_sockets;  // vector of pointers bc fd
 	std::map<int, Client*>		_clients;  // every client d in _pfds has exactly one entry here
 	std::vector<pollfd>			_pfds;
 	

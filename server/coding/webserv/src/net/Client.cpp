@@ -15,7 +15,7 @@ Client::Client(int fd) : _fd(fd), _sent(0), _recv_done(false)
 		"</body>"
 		"</html>";
 	std::ostringstream response;
-	response << "HTTP/1.1 200 OK\r\n"
+	response << "HTTP/1.1 404 Not Found\r\n"
 			<< "Content-Type: text/html\r\n"
 			<< "Content-Length: " << std::strlen(body) << "\r\n"
 			<< "Connection: close\r\n"
@@ -23,7 +23,7 @@ Client::Client(int fd) : _fd(fd), _sent(0), _recv_done(false)
 			<< body;
 
 	// full message to send
-	// this will be removed from here latet because it is not Client job to make message to himself
+	// this will be removed from here later because it is not Client job to make message to himself
 	// but since it is hard coded anyway it can be here for now
 	_out = response.str();
 }

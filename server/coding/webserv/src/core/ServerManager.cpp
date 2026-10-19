@@ -146,11 +146,11 @@ void ServerManager::run()
 				{
 					std::map<int, Client*>::iterator it = _clients.find(_pfds[i].fd);
 
-					// TODO: replace MSG_NOSIGNAL by signal(SIGPIPE, SIG_IGN) later
+					// replace MSG_NOSIGNAL <-> signal(SIGPIPE, SIG_IGN) postponed
 					ssize_t s = send(_pfds[i].fd,
 									it->second->data_to_send(),
 									it->second->bytes_to_send(),
-									MSG_NOSIGNAL);
+									0);
 					if ( s > 0)
 					{
 						it->second->add_sent_bytes((size_t)s);
