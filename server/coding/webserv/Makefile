@@ -10,6 +10,7 @@ OBJDIR		= obj
 SRCS		= src/net/ListenSocket.cpp\
 			  src/net/Client.cpp\
 			  src/core/ServerManager.cpp\
+			  src/http/HttpRequest.cpp\
 			  src/main.cpp
 
 OBJS		= $(SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)

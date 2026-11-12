@@ -2,6 +2,7 @@
 #define CLIENT_HPP
 
 #include <string>
+#include "../http/HttpRequest.hpp"
 
 class Client
 {
@@ -9,23 +10,24 @@ class Client
 	explicit Client(int fd);
 	~Client();
 
-	void		save_recv(const char* in, size_t n_bytes);
 	void		add_sent_bytes(size_t sent_bytes);
 	const char*	data_to_send() const;
 	size_t		bytes_to_send() const;
-	
-	bool		get_recv_done() const;
+		
 	bool 		get_send_done() const;
+
+	bool		get_request_recv_done() const;
+	void		request_save_recv(const char* in, size_t n_bytes);
 
   private:
 	Client(const Client&);
 	Client& operator=(const Client&);
 
 	int			_fd;
-	size_t		_sent;   // how much of _out is already sent
-	bool		_recv_done;  // have we received the whole data?
-	std::string	_in;     // bytes received so far
-	std::string	_out;    // full response to send
+	size_t		_sent;   		// how much of _out is already sent
+	std::string	_out;    		// full response to send
+
+	HttpRequest	_http_request; 	// parsing requests
 };
 
 #endif // CLIENT_HPP

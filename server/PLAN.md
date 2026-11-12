@@ -16,6 +16,24 @@ Starting point: `coding/` — a blocking tutorial server (HDE namespace: `Simple
 
 **Keep**: the socket-wrapping idea — refactor into a `ListenSocket` class that does socket → setsockopt(SO_REUSEADDR) → fcntl(O_NONBLOCK) → bind → listen and throws exceptions instead of `exit()`.
 
+## ▶ Current status (Nov 12) — read this first
+The timeline below slipped by ~3 weeks: Track A was done solo up to the start of Week 2, **Track B has not been started** (no config parser, router, error pages, uploads or CGI). Detailed step-by-step progress for Track A lives in `job3.md`.
+
+**Works now** (`coding/webserv/`, `make` builds clean with `-Wall -Wextra -Werror -Wsign-conversion -std=c++98`):
+- `ListenSocket` (REUSEADDR, O_NONBLOCK, exceptions), `ServerManager` with one `poll()` over 3 listen ports (8080–8082) + all clients.
+- `Client`: in/out buffers, partial `send`, POLLIN → POLLOUT switch, cleanup on close/error. SIGPIPE ignored.
+- `ServerConfig` struct (`ports`, `root`, `index`, `client_max_body_size`) filled by the `makeTestConfig()` stub in `main.cpp`.
+- `src/http/HttpRequest`: incremental parser (request line → headers), works for requests split anywhere across `recv`s, accepts bare `\n`, 2 KB line limit (414 / 400). Status codes 400 / 501 / 505 for bad request lines. Tests: `coding/webserv/tests/` (see its README).
+- `www/`: a small test site (HTML, CSS, images, subfolder, a folder with no index).
+
+**Not done yet:**
+- Every request still gets the same **hardcoded response** (`www/img/logo.png`, built in the `Client` constructor). The parser's status code is not used for the answer.
+- Parser: `Host` check, header edge cases, a separate ERROR state, the BODY state (`Content-Length`, 413, chunked).
+- `HttpResponse`, status/MIME tables, default error pages, `StaticHandler` (stat, index, 403/404/405, path traversal).
+- All of Track B: `conf/default.conf` is empty; config Lexer/Parser, `LocationConfig`, Router, `error_page`, redirects, autoindex, uploads, DELETE, CGI. Also timeouts (poll uses `-1`), keep-alive, README.
+
+**Where the partner can start without blocking anyone:** Track B, beginning with the config parser (Week 1 B column). The interface to fill is `struct ServerConfig` in `src/core/ServerManager.hpp`; when the parser is ready, it replaces `makeTestConfig()` in `main.cpp` (move the struct into `src/config/` then, and add `LocationConfig`).
+
 ## Target architecture
 ```
 main.cpp            parse config → build ServerManager → run()
@@ -48,7 +66,7 @@ Key rule: every `recv/send/read/write` on a socket or pipe happens **only** afte
 |---|---|---|
 | Oct 8 | Read RFC 1945 / 7230-7231 basics (request line, headers, status codes, chunked). Play with `telnet`/`curl -v` against NGINX (`docker run -p 8081:80 nginx`). | [ ] |
 | Oct 9 | With partner: agree on interface headers + git flow (branch per track). | [ ] |
-| Oct 10–11 | New repo layout + root `Makefile` (NAME=webserv, all/clean/fclean/re, `-Wall -Wextra -Werror -std=c++98`, no relink). Fix the C++98 errors above. Write `makeTestConfig()` stub. | [x] (stub pending) |
+| Oct 10–11 | New repo layout + root `Makefile` (NAME=webserv, all/clean/fclean/re, `-Wall -Wextra -Werror -std=c++98`, no relink). Fix the C++98 errors above. Write `makeTestConfig()` stub. | [x] |
 
 ✅ Milestone: `make` builds `webserv` cleanly with C++98 flags.
 
@@ -57,15 +75,15 @@ Key rule: every `recv/send/read/write` on a socket or pipe happens **only** afte
 |---|---|---|---|---|
 | Oct 12–13 | Refactor sockets → `ListenSocket` (REUSEADDR, O_NONBLOCK, exceptions, OCF). | Lexer: tokens, `{ } ;`, comments. | keep using stub config | [x] |
 | Oct 14–15 | `ServerManager`: one `poll()` over N listen fds; accept → non-blocking client fd → add to pollfd vector. | Parser: `server{ listen, server_name, error_page, client_max_body_size, location{...} }`. | — | [x] (A part) |
-| Oct 16–17 | Client read/write buffers, POLLIN/POLLOUT switching, close on 0/-1, remove from poll. Hard-coded "Hello" response. | `location` directives: `methods`, `return`, `root`, `autoindex`, `index`, `upload_store`, `cgi`. Validation. | — | [ ] |
-| Oct 18 | Merge; `main` loads config and opens every `listen` port. | | | [ ] |
+| Oct 16–17 | Client read/write buffers, POLLIN/POLLOUT switching, close on 0/-1, remove from poll. Hard-coded "Hello" response. | `location` directives: `methods`, `return`, `root`, `autoindex`, `index`, `upload_store`, `cgi`. Validation. | — | [x] (A part) |
+| Oct 18 | Merge; `main` loads config and opens every `listen` port. | | | [~] ports come from the `makeTestConfig()` stub, no `.conf` parser yet |
 
 ✅ Milestone: listens on 2+ ports, browser gets "Hello" on all, 100 parallel `curl`s don't crash it.
 
 ### Week 2 — Oct 19–25: HTTP parsing + static site
 | Days | Me (A) | Partner (B) | If alone / B late | Done |
 |---|---|---|---|---|
-| Oct 19–20 | Incremental `HttpRequest` parser (request line → headers → body), handles partial reads. | `Router`: server by port, longest-prefix location, method check → 405. | stub: `root + uri` | [ ] |
+| Oct 19–20 | Incremental `HttpRequest` parser (request line → headers → body), handles partial reads. | `Router`: server by port, longest-prefix location, method check → 405. | stub: `root + uri` | [~] request line + headers done (partial reads, line limit); Host check, BODY state open |
 | Oct 21–22 | Body: `Content-Length` + **chunked decoding**; `client_max_body_size` → 413; malformed → 400; long URI → 414. | Default error pages + custom `error_page`. | stub: `<h1>code</h1>` | [ ] |
 | Oct 23–24 | `HttpResponse` builder: status line, headers (Content-Type, Content-Length, Connection, Date), MIME table. | `StaticHandler`: index file, `autoindex` (opendir/readdir), 404/403, redirects 301/302. | I write a basic GET file handler myself | [ ] |
 | Oct 25 | Merge + browse a full static site in Firefox/Chrome. | | | [ ] |
@@ -87,7 +105,7 @@ Key rule: every `recv/send/read/write` on a socket or pipe happens **only** afte
 |---|---|---|
 | Nov 2–3 | Python test suite (`tests/`): status codes, chunked, oversized body, bad requests, many ports, DELETE, CGI. Run the 42 tester. | [ ] |
 | Nov 4–5 | Stress: `siege -b -c 100 -t 1m`, disconnects mid-request, `valgrind --leak-check=full`, fd leaks (`ls /proc/<pid>/fd`). Fix. | [ ] |
-| Nov 6 | Ignore SIGPIPE, never crash on bad config / missing files, clean shutdown on SIGINT. | [ ] |
+| Nov 6 | Ignore SIGPIPE, never crash on bad config / missing files, clean shutdown on SIGINT. | [~] SIGPIPE ignored (`signal` in `main`); the rest open |
 | Nov 7–8 | Compare headers/behaviour vs NGINX for the same config; fix diffs. | [ ] |
 
 ✅ Milestone: siege 100% availability, valgrind clean, all tests green.

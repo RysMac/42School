@@ -1,0 +1,5 @@
+This is a plain text file.
+The server should send it with Content-Type: text/plain.
+
+This folder has no index.html, so GET /files/ should answer 403
+(until autoindex is implemented, then it lists the files).

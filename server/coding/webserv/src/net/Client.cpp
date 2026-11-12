@@ -1,26 +1,34 @@
 #include "Client.hpp"
+#include "../http/HttpRequest.hpp"
 #include <cstring>
 #include <unistd.h>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 
-Client::Client(int fd) : _fd(fd), _sent(0), _recv_done(false)
+Client::Client(int fd) : _fd(fd), _sent(0)
 {
 
-	const char* body =
-		"<html>"
-		"<body>"
-		"<h1>Hello!</h1>"
-		"</body>"
-		"</html>";
+	std::ifstream file("www/img/logo.png", std::ios::binary);
+
+	if (!file.is_open())
+    {
+        std::cerr << "Nie można otworzyć pliku\n";
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+
+    std::string html = buffer.str();
+
 	std::ostringstream response;
-	response << "HTTP/1.1 404 Not Found\r\n"
-			<< "Content-Type: text/html\r\n"
-			<< "Content-Length: " << std::strlen(body) << "\r\n"
+	response << "HTTP/1.1 200 ok\r\n"
+			<< "Content-Type: image/png\r\n" // text/html
+			<< "Content-Length: " << html.size() << "\r\n"
 			<< "Connection: close\r\n"
 			<< "\r\n"
-			<< body;
+			<< html;
 
 	// full message to send
 	// this will be removed from here later because it is not Client job to make message to himself
@@ -29,13 +37,6 @@ Client::Client(int fd) : _fd(fd), _sent(0), _recv_done(false)
 }
 
 Client::~Client() { close(_fd); }
-
-void Client::save_recv(const char* in, size_t n_bytes)
-{
-	_in.append(in, n_bytes);
-	if (_in.find("\r\n\r\n") != std::string::npos)
-		_recv_done = true;
-}
 
 void Client::add_sent_bytes(size_t sent_bytes)
 {
@@ -52,12 +53,16 @@ size_t Client::bytes_to_send() const
 	return _out.size() - _sent;
 }
 
-bool Client::get_recv_done() const
-{
-	return _recv_done;
-}
-
 bool Client::get_send_done() const
 {
 	return _sent == _out.size();
+}
+
+bool Client::get_request_recv_done() const
+{
+	return _http_request.get_recv_done();
+}
+void Client::request_save_recv(const char* in, size_t n_bytes)
+{
+	_http_request.save_recv(in, n_bytes);
 }

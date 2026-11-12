@@ -13,15 +13,15 @@
 
 #define BUFFER_SIZE 1024
 
-ServerManager::ServerManager(const std::vector<int>& ports)
+ServerManager::ServerManager(ServerConfig& config) : _config(config)
 {
 	const std::string host = "0.0.0.0";
 
 	try
 	{
-		_sockets.reserve(ports.size());
+		_sockets.reserve(_config.ports.size());
 		std::vector<int>::const_iterator pi;
-		for (pi = ports.begin(); pi != ports.end(); ++pi) {
+		for (pi = _config.ports.begin(); pi != _config.ports.end(); ++pi) {
 
 			ListenSocket *s = new ListenSocket(host, *pi);
 			_sockets.push_back(s);
@@ -130,8 +130,8 @@ void ServerManager::run()
 						std::cout << "Received from Client: " << _pfds[i].fd << "\n";
 
 						std::map<int, Client*>::iterator it = _clients.find(_pfds[i].fd);
-						it->second->save_recv(buffer, (size_t)bytes_read);
-						if (it->second->get_recv_done())
+						it->second->request_save_recv(buffer, (size_t)bytes_read);
+						if (it->second->get_request_recv_done())
 							_pfds[i].events = POLLOUT;
 					}
 					else // this means that recv failed or client disconnected
@@ -146,7 +146,7 @@ void ServerManager::run()
 				{
 					std::map<int, Client*>::iterator it = _clients.find(_pfds[i].fd);
 
-					// replace MSG_NOSIGNAL <-> signal(SIGPIPE, SIG_IGN) postponed
+					// MSG_NOSIGNAL <-> signal(SIGPIPE, SIG_IGN) - remember it
 					ssize_t s = send(_pfds[i].fd,
 									it->second->data_to_send(),
 									it->second->bytes_to_send(),

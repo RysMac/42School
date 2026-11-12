@@ -7,10 +7,19 @@
 #include <poll.h>
 #include <map>
 
+struct ServerConfig
+{
+	std::vector<int>	ports;
+	std::string			root;
+	std::string			index;
+	size_t				client_max_body_size;
+
+};
+
 class ServerManager
 {
   public:
-	ServerManager(const std::vector<int>& ports);
+	ServerManager(ServerConfig& config);
 	~ServerManager();
 	void run();
 
@@ -18,6 +27,7 @@ class ServerManager
 	ServerManager(const ServerManager&);
 	ServerManager& operator=(const ServerManager&);
 
+	ServerConfig				_config;
 	std::vector<ListenSocket*>	_sockets;  // vector of pointers bc fd
 	std::map<int, Client*>		_clients;  // every client d in _pfds has exactly one entry here
 	std::vector<pollfd>			_pfds;

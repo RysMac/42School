@@ -1,6 +1,7 @@
 # Job 2 — Client buffers & partial I/O (PLAN: Week 1, Oct 16–18, ~4h)
 
-## ▶ Progress (Oct 15): steps 1–5 committed in `aea64b5`. Clean-up is mostly done; leftovers below. Next: step 6.
+## ▶ Progress (Oct 28): CLOSED. Continue in `job3.md`; its step 0 holds the leftovers (SIGPIPE 5 MB proof, comment/typo fixes, commit). `makeTestConfig()` moved to job3 step 1. SIGPIPE: `signal(SIGPIPE, SIG_IGN)` is now the first line of `main`, `send(..., 0)`.
+### Oct 15 notes: steps 1–5 committed in `aea64b5`.
 - Clean-up leftovers (Oct 15 check): `Client.cpp:26` "latet"; typos in `ServerManager.hpp` comments ("poinrterss", "client d" → "client fd"); trailing whitespace in `main.cpp` (lines 9–27), `Client.hpp:16`, `ServerManager.hpp:24`, `ServerManager.cpp:138,139,165`. `delClient` rename still open (TODO in the code).
 ### Oct 13 notes
 - Done (Oct 13): all 6 open fixes from Oct 12. The setters are replaced by behaviour methods: `save_recv(const char*, size_t)` (appends; sets `_recv_done` when `_in` contains `\r\n\r\n`), `add_sent_bytes(n)`, and the `const` questions `data_to_send()`, `bytes_to_send()`, `get_recv_done()`, `get_send_done()` (computed as `_sent == _out.size()`, no flag). POLLIN sets POLLOUT only when the request is complete. POLLOUT sends from `_sent` and removes the client only when everything is sent.

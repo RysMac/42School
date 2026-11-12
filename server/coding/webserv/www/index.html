@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>webserv test site</title>
+	<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+	<header>
+		<h1>webserv</h1>
+		<p>A small static site to test the server.</p>
+	</header>
+
+	<main>
+		<section>
+			<h2>An image (binary file, image/png)</h2>
+			<img src="/img/logo.png" alt="logo" width="160">
+		</section>
+
+		<section>
+			<h2>Links to test</h2>
+			<ul>
+				<li><a href="/gallery/">/gallery/</a>: a subfolder with its own index.html → 200</li>
+				<li><a href="/gallery">/gallery</a>: the same folder without the trailing slash → 301 to /gallery/ (nginx)</li>
+				<li><a href="/files/">/files/</a>: a folder with no index.html → 403 (later: autoindex)</li>
+				<li><a href="/files/notes.txt">/files/notes.txt</a>: plain text → text/plain</li>
+				<li><a href="/does-not-exist.html">/does-not-exist.html</a> → 404</li>
+			</ul>
+		</section>
+
+		<section>
+			<h2>A form (POST, for step 5)</h2>
+			<form action="/" method="post">
+				<input type="text" name="message" value="hello">
+				<button type="submit">Send POST</button>
+			</form>
+			<p class="hint">For now the server should answer 405 Method Not Allowed.</p>
+		</section>
+	</main>
+
+	<footer>
+		<p>Served by webserv · 42 project</p>
+	</footer>
+</body>
+</html>
