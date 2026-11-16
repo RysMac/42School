@@ -1,7 +1,6 @@
 #include "HttpRequest.hpp"
 
 #include <string>
-#include <sstream>
 #include <iostream>
 #include <cctype>
 
@@ -10,44 +9,8 @@ static std::string toLower(const std::string& s);
 static bool isUpperWord(const std::string& s);
 
 // constructor
-HttpRequest::HttpRequest() : _state(PARSE_REQUEST_LINE), _status(0) {}
+HttpRequest::HttpRequest() : _state(PARSE_REQUEST_LINE), _status(0), _header_bytes(0) {}
 HttpRequest::~HttpRequest() {}
-
-void HttpRequest::parsing()
-{
-	std::istringstream	stream(_in);
-	std::string			line;
-
-	_status = 0;
-	_headers.clear();
-
-	std::getline(stream, line);
-	if (!line.empty() && line[line.size() - 1] == '\r')
-		line.erase(line.size() - 1);
-
-	if (parse_request_line(line))
-	{
-		while (std::getline(stream, line))
-		{
-			// strip '\r' first, only then can we see the empty line
-			if (!line.empty() && line[line.size() - 1] == '\r')
-				line.erase(line.size() - 1);
-			if (line.empty())
-				break;					// end of headers, the next is body
-
-			size_t colon = line.find(':');
-			if (colon == std::string::npos)
-			{
-				_status = 400;
-				break;
-			}
-
-			std::string name	= toLower(trim(line.substr(0, colon)));
-			std::string value	= trim(line.substr(colon + 1));
-			_headers[name] = value;
-		}
-	}
-}
 
 void HttpRequest::print_members() const
 {
@@ -146,91 +109,129 @@ static std::string toLower(const std::string& s)
 bool HttpRequest::get_recv_done() const
 {
 	print_members();
-	if (_state == PARSE_COMPLETE) { return true; }
-	return false;
+	// done = nothing more to read: either a full request or an error
+	return _state == PARSE_COMPLETE || _state == PARSE_ERROR;
 }
 
 void HttpRequest::save_recv(const char* in, size_t n_bytes)
 {
-	const size_t MAX_LINE_SIZE = 2048;
-
 	_in.append(in, n_bytes);
-	
+
 	while (_state == PARSE_REQUEST_LINE || _state == PARSE_HEADERS)
 	{
 		size_t newlinePos = _in.find('\n');
 
+		// line not "closed" yet: only check that it is not already too long
 		if (newlinePos == std::string::npos)
 		{
-			if (_in.length() > MAX_LINE_SIZE)
-			{
-				if (_state == PARSE_REQUEST_LINE)
-				{
-					_status = 414;
-				}
-				else
-				{
-					_status = 400;  // or 431 only for headers
-				}
-				_state = PARSE_COMPLETE;
-				return;
-			}
-			break;
-		} // line not "closed" keep going
-		else
-		{
-			if (newlinePos > MAX_LINE_SIZE)
-			{
-				if (_state == PARSE_REQUEST_LINE)
-				{
-					_status = 414;
-				}
-				else
-				{
-					_status = 400;  // or 431 only for headers
-				}
-				_state = PARSE_COMPLETE;
-				return;
-			}
+			check_limits(_in.length());
+			return;
 		}
-		
+		if (!check_limits(newlinePos))
+			return;
 
 		// if we have full line take it and parse it
 		std::string line = _in.substr(0, newlinePos);
+		if (_state == PARSE_HEADERS)
+			_header_bytes += newlinePos + 1;
+		_in.erase(0, newlinePos + 1);
 		// strip '\r' first, only then can we see the empty line
 		if (!line.empty() && line[line.size() - 1] == '\r')
-				line.erase(line.size() - 1);
-		_in.erase(0, newlinePos + 1);
-	
-		if (_state == PARSE_REQUEST_LINE) {
-			if (!parse_request_line(line)) {
-				// first line error
-				_state = PARSE_COMPLETE;
-				return; // return is proper??
-			}
-			_state = PARSE_HEADERS;   // first line done so go to headers
-		}
-		else if (_state == PARSE_HEADERS) {
-			// strip '\r' first, only then can we see the empty line
-			// if (!line.empty() && line[line.size() - 1] == '\r')
-			// 	line.erase(line.size() - 1);
-			if (line.empty())
-			{
-				_state = PARSE_COMPLETE;
-				break;					// end of headers, the next is body later
-			}
+			line.erase(line.size() - 1);
 
-			size_t colon = line.find(':');
-			if (colon == std::string::npos)
+		if (_state == PARSE_REQUEST_LINE)
+		{
+			if (!parse_request_line(line))
 			{
-				_status = 400;
-				_state = PARSE_COMPLETE;
-				break;
+				set_error(_status);		// parse_request_line already chose the code
+				return;
 			}
-
-			std::string name	= toLower(trim(line.substr(0, colon)));
-			std::string value	= trim(line.substr(colon + 1));
-			_headers[name] = value;
+			_state = PARSE_HEADERS;		// first line done so go to headers
 		}
+		else if (line.empty())			// end of headers, the body comes later (step 5)
+		{
+			// Host is required only in HTTP/1.1
+			if (_version == "HTTP/1.1" && _headers.find("host") == _headers.end())
+			{
+				set_error(400);
+				return;
+			}
+			_state = PARSE_COMPLETE;
+		}
+		else if (!parse_header_line(line))
+			return;
 	}
+}
+
+// "name: value". Returns false (and goes to PARSE_ERROR) on a bad line.
+bool HttpRequest::parse_header_line(const std::string& line)
+{
+	size_t colon = line.find(':');
+	if (colon == std::string::npos)
+		return set_error(400);
+
+	// raw name, before any trim: empty, or any space/tab in it
+	// ("Host : x", " Host: x" = obsolete line folding) -> 400 (RFC 9112 5.1)
+	std::string rawName = line.substr(0, colon);
+	if (rawName.empty() || rawName.find_first_of(" \t") != std::string::npos)
+		return set_error(400);
+
+	std::string name	= toLower(rawName);
+	std::string value	= trim(line.substr(colon + 1));
+
+	// more than one Host -> 400 (RFC 9112 3.2). Other duplicates: last one wins.
+	if (name == "host" && _headers.find("host") != _headers.end())
+		return set_error(400);
+
+	_headers[name] = value;
+	return true;
+}
+
+// len = length of the current line (or of the unfinished data).
+// Request line > 2 KB -> 414; header line > 2 KB or all headers > 8 KB -> 431.
+bool HttpRequest::check_limits(size_t len)
+{
+	const size_t MAX_LINE_SIZE		= 2048;
+	const size_t MAX_HEADERS_SIZE	= 8192;
+
+	if (_state == PARSE_REQUEST_LINE)
+	{
+		if (len > MAX_LINE_SIZE)
+			return set_error(414);
+	}
+	else if (len > MAX_LINE_SIZE || _header_bytes + len > MAX_HEADERS_SIZE)
+		return set_error(431);
+	return true;
+}
+
+// always returns false, so callers can write: return set_error(400);
+bool HttpRequest::set_error(int status)
+{
+	_status = status;
+	_state = PARSE_ERROR;
+	return false;
+}
+
+const std::string& HttpRequest::get_path() const
+{
+	return _path;
+}
+
+const std::string& HttpRequest::get_version() const
+{
+	return _version;
+}
+
+// header names are stored lowercase; returns "" when the header is missing
+std::string HttpRequest::get_header(const std::string& name) const
+{
+	std::map<std::string, std::string>::const_iterator it = _headers.find(toLower(name));
+	if (it == _headers.end())
+		return "";
+	return it->second;
+}
+
+bool HttpRequest::has_header(const std::string& name) const
+{
+	return _headers.find(toLower(name)) != _headers.end();
 }
