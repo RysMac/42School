@@ -11,6 +11,7 @@ SRCS		= src/net/ListenSocket.cpp\
 			  src/net/Client.cpp\
 			  src/core/ServerManager.cpp\
 			  src/http/HttpRequest.cpp\
+			  src/http/HttpResponse.cpp\
 			  src/main.cpp
 
 OBJS		= $(SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
