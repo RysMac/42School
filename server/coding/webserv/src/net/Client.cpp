@@ -3,40 +3,17 @@
 #include <cstring>
 #include <unistd.h>
 #include <iostream>
-#include <sstream>
-#include <fstream>
 
 
-Client::Client(int fd) : _fd(fd), _sent(0)
-{
-
-	std::ifstream file("www/img/logo.png", std::ios::binary);
-
-	if (!file.is_open())
-    {
-        std::cerr << "Nie można otworzyć pliku\n";
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-
-    std::string html = buffer.str();
-
-	std::ostringstream response;
-	response << "HTTP/1.1 200 ok\r\n"
-			<< "Content-Type: image/png\r\n" // text/html
-			<< "Content-Length: " << html.size() << "\r\n"
-			<< "Connection: close\r\n"
-			<< "\r\n"
-			<< html;
-
-	// full message to send
-	// this will be removed from here later because it is not Client job to make message to himself
-	// but since it is hard coded anyway it can be here for now
-	_out = response.str();
-}
+Client::Client(int fd) : _fd(fd), _sent(0) {}
 
 Client::~Client() { close(_fd); }
+
+void Client::set_response(const std::string& out)
+{
+	_out = out;
+	_sent = 0;
+}
 
 void Client::add_sent_bytes(size_t sent_bytes)
 {
@@ -65,4 +42,9 @@ bool Client::get_request_recv_done() const
 void Client::request_save_recv(const char* in, size_t n_bytes)
 {
 	_http_request.save_recv(in, n_bytes);
+}
+
+const HttpRequest& Client::get_request() const
+{
+	return _http_request;
 }

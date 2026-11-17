@@ -1,6 +1,6 @@
 # Job 3: Understand the request, answer it precisely (PLAN Week 2, this week Oct 28 – Nov 3, ~4h/day)
 
-## ▶ Progress (Nov 16, checked against the code). Next: step 3 (`HttpResponse` uses the parser), then step 0 leftovers.
+## ▶ Progress (Nov 17, checked against the code). Next: step 4 (serve files from `www/` by path), then step 0 leftovers.
 - **Pushed** for the partner (branch `server`): Nov 12 `d453b32` (steps 1, 2a), Nov 16 `95e6db1` (step 2 done). See also the "Current status" block at the top of `PLAN.md`.
 - Step 1 done: `ServerConfig` + `makeTestConfig()` (marked `// STAB` → fix to `// STUB`, or the final `grep STUB` misses it), `www/` site.
 - Step 2 done (Nov 16): `src/http/HttpRequest.*`, by-value member of `Client`, `_in` lives in the parser. `save_recv` loop: find `\n`, strip `\r`, erase the consumed line (bare `\n` accepted).
@@ -14,7 +14,10 @@
   - Still open (your choice, later): remove `print_members()` from `get_recv_done()` (it prints on every recv, and it's a side effect in a `const` getter).
 - Tests: `coding/webserv/tests/` (4 standalone programs, README). Nov 16 run: request_line 20/20, split 16/16 (8 new: Host in a later recv, two Hosts, `Host :`, empty name, folded line, HTTP/1.0 without Host, 10 KB of headers → 431 at once and in 100-byte pieces), both limit tests ok.
 - Learned (Nov 16): a check placed after the `while` runs on **every** `recv`, not when the headers end → a request split across recvs got 400 ("1 byte/call" test broke). `map[key]` inserts a missing key; use `find` to only read. Same expression (`find != end`) means "found": copy-pasting it into the opposite check inverted it.
-- **Not wired yet:** the answer ignores the parser. Every request, even a 400/501, gets `200 ok` + `www/img/logo.png` from the `Client` constructor (checked Nov 12: `BREW / HTTP/1.1` → `HTTP/1.1 200 ok`). Step 3 fixes that.
+- Step 3, first half done (Nov 16, `03465a6`): `src/http/HttpResponse.*`. You wrote the `.hpp`; Claude wrote the `.cpp` on request (study it). Defaults 200 + `Connection: close`; `set_body(body, type)`; `to_string()` always computes `Content-Length` (a hand-set one is ignored); `make_error(code)` = default HTML page (`STUB`: error_page); `reason_phrase()` table covers every parser code, else "Unknown". Test: `tests/response_test.cpp`. In the Makefile.
+- Step 3 done (Nov 17, not committed yet): response wired in. In the POLLIN branch, when `get_request_recv_done()` is true, the answer is built **once**: `get_status() != 0` → `HttpResponse::make_error(status)`, else a fixed 200 "It works" page; `client->set_response(rsp.to_string())` (sets `_out`, resets `_sent = 0`), then `events = POLLOUT`. POLLOUT branch only sends `data_to_send()/bytes_to_send()`, knows nothing about HTTP. Logo response removed from the `Client` constructor. New `Client::get_request()` (const&). You tested it and it works. Code shown by Claude on request, you rewrote it.
+- Learned (Nov 17): `_out` must stay in `Client`: anything that has to survive between two `poll()` iterations (bytes left to send + `_sent`) can't be a local; a local response rebuilt on each POLLOUT resends from byte 0 after a partial `send`. `HttpResponse` = temporary builder, `_out` = finished bytes. Never switch to POLLOUT with empty `_out` (`0 == 0` → "done", closes with nothing sent). Static member → `HttpResponse::make_error`. `send` takes `const void*` + length, not C++ objects. Streaming/building on the fly: later, for CGI pipes / big files.
+- Later: when the `if/else` grows (files, 404, 405), move it to `handle_request(const HttpRequest&, const ServerConfig&)`.
 - Step 0 still open: 5 MB SIGPIPE proof; comment at `ServerManager.cpp:149`; empty line after `{` in `main`; `client d` typo (`ServerManager.hpp:32`); review notes from Oct 29 (`const ServerConfig&` in the `ServerManager` constructor, `ServerConfig c = makeTestConfig();` in one line).
 - Learned (Oct 29): `sizeof(std::string)` is the object size (32), not the content (`.size()`); wrong `Content-Type` → garbage in the browser; one fixed file for every URL → no CSS/image, which is why the path must be parsed.
 - Reference server: `python3 -m http.server -d www 9100`.
@@ -133,9 +136,9 @@ Plus the job2 test: one request in 3 pieces, split at `\r` | `\n`. The answer co
 
 ## 3. `HttpResponse`: building the answer (≈1 session) — [ ]
 New files: `src/http/HttpResponse.hpp/.cpp`. It holds a status code, headers and a body, and turns them into the bytes for `_out`.
-- [ ] Status code → reason phrase table (200 OK, 400 Bad Request, 403, 404, 405, 413, 414, 500, 501, 505…). One place, not strings scattered through the code.
+- [x] Status code → reason phrase table (200 OK, 400 Bad Request, 403, 404, 405, 413, 414, 500, 501, 505…). One place, not strings scattered through the code.
 - [ ] Always send `Content-Length` and `Connection: close` (keep-alive comes later). `Content-Type` from step 4. `Date` is optional (nginx sends it).
-- [ ] **Default error pages** (the subject requires them): a helper that makes a complete response for any error code, with a small HTML body like `<h1>404 Not Found</h1>`. Mark it `// STUB` where `error_page` from the config will plug in later.
+- [x] **Default error pages** (the subject requires them): a helper that makes a complete response for any error code, with a small HTML body like `<h1>404 Not Found</h1>`. Mark it `// STUB` where `error_page` from the config will plug in later.
 - [ ] **Move `_out` out of the `Client` constructor.** Your own comment says it's not Client's job. New flow: request is DONE → *something* builds the response → `Client` receives the finished bytes and sends them. Who is that "something", and who calls it? (`ServerManager` in the POLLIN branch, or a separate function/class?) Draw the arrows before writing it.
 - [ ] Check: the 400/414/501/505 tests from step 2 now answer with the right status line **and** an HTML body you can see in the browser.
 

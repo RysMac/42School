@@ -1,6 +1,7 @@
 #include "ServerManager.hpp"
 #include "../net/ListenSocket.hpp"
 #include "../net/Client.hpp"
+#include "../http/HttpResponse.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -132,7 +133,20 @@ void ServerManager::run()
 						std::map<int, Client*>::iterator it = _clients.find(_pfds[i].fd);
 						it->second->request_save_recv(buffer, (size_t)bytes_read);
 						if (it->second->get_request_recv_done())
+						{
+							int status = it->second->get_request().get_status();
+							HttpResponse rsp;
+							if (status != 0)
+							{
+								rsp = HttpResponse::make_error(status);
+							}
+							else
+							{
+								rsp.set_body("<html><body><h1>It works</h1></body></html>\n","text/html");
+							}
+							it->second->set_response(rsp.to_string());
 							_pfds[i].events = POLLOUT;
+						}
 					}
 					else // this means that recv failed or client disconnected
 					{					
