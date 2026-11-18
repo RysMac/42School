@@ -11,6 +11,9 @@
 #include <cstring>
 #include <fcntl.h>
 #include <map>
+#include <fstream>
+#include <cerrno>
+#include <sys/stat.h>
 
 #define BUFFER_SIZE 1024
 
@@ -134,23 +137,13 @@ void ServerManager::run()
 						it->second->request_save_recv(buffer, (size_t)bytes_read);
 						if (it->second->get_request_recv_done())
 						{
-							int status = it->second->get_request().get_status();
-							HttpResponse rsp;
-							if (status != 0)
-							{
-								rsp = HttpResponse::make_error(status);
-							}
-							else
-							{
-								rsp.set_body("<html><body><h1>It works</h1></body></html>\n","text/html");
-							}
-							it->second->set_response(rsp.to_string());
+							it->second->set_response(handle_request(it->second->get_request()).to_string());
 							_pfds[i].events = POLLOUT;
 						}
 					}
 					else // this means that recv failed or client disconnected
-					{					
-						std::cout << "Client disconnected or recv failed. FD: " 
+					{
+						std::cout << "Client disconnected or recv failed. FD: "
 								<< _pfds[i].fd << "\n";
 						delClient(i);
 						continue;
@@ -176,7 +169,7 @@ void ServerManager::run()
 						}
 					}
 					else // send failed
-					{		
+					{
 						delClient(i);
 						continue;
 					}
@@ -232,4 +225,102 @@ void ServerManager::delClient(size_t i)
 
 	if (i != _pfds.size() - 1) _pfds[i] = _pfds.back();
 	_pfds.pop_back();
+}
+
+HttpResponse ServerManager::handle_request(const HttpRequest& request) const
+{
+	int status = request.get_status();
+	HttpResponse rsp;
+	if (status != 0)
+	{
+		rsp = HttpResponse::make_error(status);
+	}
+	else if (request.get_method() != "GET")
+	{
+		// 405 must say which methods are allowed (RFC 9110 §15.5.6)
+		rsp = HttpResponse::make_error(405);
+		rsp.set_header("Allow", "GET");
+	}
+	else
+	{
+		// the target is path + optional "?query"; only the path names a file
+		std::string path = request.get_path();
+		size_t q = path.find('?');
+		if (q != std::string::npos)
+			path.erase(q);
+
+		// TODO safety: path is used as the client sent it (no ".." check yet)
+		rsp = serve_static(path);
+	}
+	return rsp;
+}
+
+// extension -> Content-Type; without the right type the browser ignores CSS
+static std::string mime_type(const std::string& file)
+{
+	size_t dot = file.rfind('.');
+	if (dot == std::string::npos)
+		return "application/octet-stream";
+
+	std::string ext = file.substr(dot + 1);
+	if (ext == "html" || ext == "htm")	return "text/html";
+	if (ext == "css")					return "text/css";
+	if (ext == "js")					return "application/javascript";
+	if (ext == "png")					return "image/png";
+	if (ext == "jpg" || ext == "jpeg")	return "image/jpeg";
+	if (ext == "gif")					return "image/gif";
+	if (ext == "ico")					return "image/x-icon";
+	if (ext == "txt")					return "text/plain";
+	return "application/octet-stream";	// unknown: the browser offers a download
+}
+
+// stat() failed: why? (errno is set by stat)
+static int stat_error_status()
+{
+	if (errno == ENOENT || errno == ENOTDIR)
+		return 404;
+	if (errno == EACCES)
+		return 403;
+	return 500;
+}
+
+// path = URL path without the query, always starting with '/'
+HttpResponse ServerManager::serve_static(const std::string& path) const
+{
+	std::string	file = _config.root + path;	// "www" + "/style.css"
+	struct stat	st;
+
+	if (stat(file.c_str(), &st) == -1)
+		return HttpResponse::make_error(stat_error_status());
+
+	if (S_ISDIR(st.st_mode))
+	{
+		// "/gallery" -> "/gallery/": else relative links in that page
+		// ("photo.png", "../style.css") resolve against the wrong folder
+		if (path[path.size() - 1] != '/')
+		{
+			HttpResponse r = HttpResponse::make_error(301);
+			r.set_header("Location", path + "/");
+			return r;
+		}
+		file += _config.index;
+		if (stat(file.c_str(), &st) == -1)
+			return HttpResponse::make_error(403);	// no index, no autoindex yet
+	}
+
+	if (!S_ISREG(st.st_mode))
+		return HttpResponse::make_error(403);	// fifo, device, dir named index.html...
+
+	// regular files don't need poll() (subject), so read it all at once
+	// TODO: a huge file ends up in memory twice (here and in _out)
+	std::ifstream in(file.c_str(), std::ios::in | std::ios::binary);
+	if (!in)
+		return HttpResponse::make_error(403);	// exists but we can't read it
+
+	std::ostringstream content;
+	content << in.rdbuf();		// copies every byte, '\0' included
+
+	HttpResponse r;
+	r.set_body(content.str(), mime_type(file));
+	return r;
 }

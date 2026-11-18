@@ -1,7 +1,7 @@
 # Job 3: Understand the request, answer it precisely (PLAN Week 2, this week Oct 28 – Nov 3, ~4h/day)
 
-## ▶ Progress (Nov 17, checked against the code). Next: step 4 (serve files from `www/` by path), then step 0 leftovers.
-- **Pushed** for the partner (branch `server`): Nov 12 `d453b32` (steps 1, 2a), Nov 16 `95e6db1` (step 2 done). See also the "Current status" block at the top of `PLAN.md`.
+## ▶ Progress (Nov 18, checked against the code). Steps 1–3 done, step 4 works but is **not safe yet**. **Next: Trap 4 (path traversal)**, then step 0 leftovers.
+- **Pushed** for the partner (branch `server`): Nov 12 `d453b32` (steps 1, 2a), Nov 16 `95e6db1` (step 2 done), Nov 17 `03465a6` + `cccab76` (step 3 done), Nov 18 (step 4 without traversal check). See also the "Current status" block at the top of `PLAN.md`.
 - Step 1 done: `ServerConfig` + `makeTestConfig()` (marked `// STAB` → fix to `// STUB`, or the final `grep STUB` misses it), `www/` site.
 - Step 2 done (Nov 16): `src/http/HttpRequest.*`, by-value member of `Client`, `_in` lives in the parser. `save_recv` loop: find `\n`, strip `\r`, erase the consumed line (bare `\n` accepted).
   - Request line: 400 / 501 / 505 (`parse_request_line`).
@@ -15,9 +15,16 @@
 - Tests: `coding/webserv/tests/` (4 standalone programs, README). Nov 16 run: request_line 20/20, split 16/16 (8 new: Host in a later recv, two Hosts, `Host :`, empty name, folded line, HTTP/1.0 without Host, 10 KB of headers → 431 at once and in 100-byte pieces), both limit tests ok.
 - Learned (Nov 16): a check placed after the `while` runs on **every** `recv`, not when the headers end → a request split across recvs got 400 ("1 byte/call" test broke). `map[key]` inserts a missing key; use `find` to only read. Same expression (`find != end`) means "found": copy-pasting it into the opposite check inverted it.
 - Step 3, first half done (Nov 16, `03465a6`): `src/http/HttpResponse.*`. You wrote the `.hpp`; Claude wrote the `.cpp` on request (study it). Defaults 200 + `Connection: close`; `set_body(body, type)`; `to_string()` always computes `Content-Length` (a hand-set one is ignored); `make_error(code)` = default HTML page (`STUB`: error_page); `reason_phrase()` table covers every parser code, else "Unknown". Test: `tests/response_test.cpp`. In the Makefile.
-- Step 3 done (Nov 17, not committed yet): response wired in. In the POLLIN branch, when `get_request_recv_done()` is true, the answer is built **once**: `get_status() != 0` → `HttpResponse::make_error(status)`, else a fixed 200 "It works" page; `client->set_response(rsp.to_string())` (sets `_out`, resets `_sent = 0`), then `events = POLLOUT`. POLLOUT branch only sends `data_to_send()/bytes_to_send()`, knows nothing about HTTP. Logo response removed from the `Client` constructor. New `Client::get_request()` (const&). You tested it and it works. Code shown by Claude on request, you rewrote it.
+- Step 3 done (Nov 17, `cccab76`): response wired in. In the POLLIN branch, when `get_request_recv_done()` is true, the answer is built **once**: `get_status() != 0` → `HttpResponse::make_error(status)`, else a fixed 200 "It works" page; `client->set_response(rsp.to_string())` (sets `_out`, resets `_sent = 0`), then `events = POLLOUT`. POLLOUT branch only sends `data_to_send()/bytes_to_send()`, knows nothing about HTTP. Logo response removed from the `Client` constructor. New `Client::get_request()` (const&). You tested it and it works. Code shown by Claude on request, you rewrote it.
 - Learned (Nov 17): `_out` must stay in `Client`: anything that has to survive between two `poll()` iterations (bytes left to send + `_sent`) can't be a local; a local response rebuilt on each POLLOUT resends from byte 0 after a partial `send`. `HttpResponse` = temporary builder, `_out` = finished bytes. Never switch to POLLOUT with empty `_out` (`0 == 0` → "done", closes with nothing sent). Static member → `HttpResponse::make_error`. `send` takes `const void*` + length, not C++ objects. Streaming/building on the fly: later, for CGI pipes / big files.
-- Later: when the `if/else` grows (files, 404, 405), move it to `handle_request(const HttpRequest&, const ServerConfig&)`.
+- Step 4, first part (Nov 18): `ServerManager::handle_request(const HttpRequest&) const` returns an `HttpResponse`; `run()` stores it (`set_response(handle_request(...).to_string())`). It's a member, so it reads `_config` (no `ServerConfig` argument); request in, response out, it never touches `Client`.
+  - Order: parser error → `make_error(status)`; not GET → 405 + `Allow: GET` (header set **after** `make_error`, which replaces the whole object); GET → cut the `?query` (`find('?')` + `erase`), then `serve_static(path)`.
+  - You wrote `handle_request`, the refactor and the query cut (Claude fixed the 405 order/`Allow`). Claude wrote `serve_static`, `mime_type`, `stat_error_status` on request → **read them before the defense**.
+  - `serve_static(path)`: `root + path` → `stat()`. Fails: `ENOENT`/`ENOTDIR` 404, `EACCES` 403, else 500. Directory: no trailing `/` → 301 `Location: path/`; else `+ index`, `stat` again, missing → 403 (no autoindex). Not a regular file → 403. `ifstream` binary + `<< rdbuf()` → 200 with `mime_type(file)`; open fails → 403.
+  - Nov 18 curl run: `/` 200 html, `/style.css` css, `/img/logo.png` png (`cmp` SAME), `/gallery/` 200, `/gallery` 301, `/files/` 403, `/files/notes.txt` text/plain, `/does-not-exist.html` 404, `?x=1` ignored, POST 405.
+  - **Hole (open):** `curl --path-as-is localhost:8080/../../../../../../../../../etc/passwd` returns the real passwd; `/../Makefile` too. Check goes where `// TODO safety` is in `handle_request`. `realpath()` is not on the subject's allowed list.
+  - TODOs: 301 drops the query; a huge file sits in memory twice (body + `_out`); `root` is relative → start the server from `coding/webserv/`.
+- Learned (Nov 18): calling a function needs its argument (`handle_request()` vs `handle_request(req)`); a header must include the types it uses (`HttpResponse` came too late via the `.cpp`); a non-void function needs `return`; an old server still on 8080 makes a fix look like it did nothing (`pgrep -a webserv`).
 - Step 0 still open: 5 MB SIGPIPE proof; comment at `ServerManager.cpp:149`; empty line after `{` in `main`; `client d` typo (`ServerManager.hpp:32`); review notes from Oct 29 (`const ServerConfig&` in the `ServerManager` constructor, `ServerConfig c = makeTestConfig();` in one line).
 - Learned (Oct 29): `sizeof(std::string)` is the object size (32), not the content (`.size()`); wrong `Content-Type` → garbage in the browser; one fixed file for every URL → no CSS/image, which is why the path must be parsed.
 - Reference server: `python3 -m http.server -d www 9100`.
@@ -134,23 +141,26 @@ curl -s -o /dev/null -w '%{http_code}\n' "localhost:8080/$(head -c 10000 /dev/ze
 ```
 Plus the job2 test: one request in 3 pieces, split at `\r` | `\n`. The answer comes only after the last piece.
 
-## 3. `HttpResponse`: building the answer (≈1 session) — [ ]
+## 3. `HttpResponse`: building the answer (≈1 session) — [x] done Nov 17 (`03465a6`, `cccab76`; checked Nov 18)
 New files: `src/http/HttpResponse.hpp/.cpp`. It holds a status code, headers and a body, and turns them into the bytes for `_out`.
 - [x] Status code → reason phrase table (200 OK, 400 Bad Request, 403, 404, 405, 413, 414, 500, 501, 505…). One place, not strings scattered through the code.
-- [ ] Always send `Content-Length` and `Connection: close` (keep-alive comes later). `Content-Type` from step 4. `Date` is optional (nginx sends it).
+- [x] Always send `Content-Length` and `Connection: close` (keep-alive comes later). `Content-Type` from step 4. `Date` is optional (nginx sends it).
+  -> `Connection: close` set in the constructor, `Content-Length` always computed in `to_string()`. No `Date` (optional).
 - [x] **Default error pages** (the subject requires them): a helper that makes a complete response for any error code, with a small HTML body like `<h1>404 Not Found</h1>`. Mark it `// STUB` where `error_page` from the config will plug in later.
-- [ ] **Move `_out` out of the `Client` constructor.** Your own comment says it's not Client's job. New flow: request is DONE → *something* builds the response → `Client` receives the finished bytes and sends them. Who is that "something", and who calls it? (`ServerManager` in the POLLIN branch, or a separate function/class?) Draw the arrows before writing it.
-- [ ] Check: the 400/414/501/505 tests from step 2 now answer with the right status line **and** an HTML body you can see in the browser.
+- [x] **Move `_out` out of the `Client` constructor.** Your own comment says it's not Client's job. New flow: request is DONE → *something* builds the response → `Client` receives the finished bytes and sends them. Who is that "something", and who calls it? (`ServerManager` in the POLLIN branch, or a separate function/class?) Draw the arrows before writing it.
+  -> `ServerManager` POLLIN branch: request done → builds `HttpResponse` → `client->set_response(rsp.to_string())` → `events = POLLOUT`. POLLOUT only sends bytes. (Move to `handle_request(...)` in step 4.)
+- [x] Check: the 400/414/501/505 tests from step 2 now answer with the right status line **and** an HTML body you can see in the browser.
+  -> Nov 18 rerun: ok 200, `get` 400, no Host 400, HTTP/2.0 505, BREW 501, no `:` 400, 10 KB URL 414 (with `<h1>` body). `/nope` still gives 200 "It works": expected, step 4 fixes it.
 
-## 4. Static GET: serving files (≈2 sessions) — [ ]
+## 4. Static GET: serving files (≈2 sessions) — [~] works Nov 18, path traversal still open ← **current step**
 New files: `src/handlers/StaticHandler.*` (or one function to start with). Path = `root + target` (without the `?query` part).
-- [ ] Only GET for now. Any other known method → 405 (with an `Allow: GET` header; check what nginx sends). POST/DELETE come with the config job and Week 3.
-- [ ] Use `stat()` on the path: does not exist → 404; a directory → `index.html` inside it, or 403 if there's none (autoindex comes later); a regular file → read it and send it with 200; no permission → 403.
-- [ ] **Directory without a trailing `/`** (`/sub` instead of `/sub/`): nginx answers 301 to `/sub/`. Why? (Think about relative links inside that page, like `style.css`.) Implement it, or note it as a TODO. Your choice.
-- [ ] **Reading the file:** the subject says regular disk files don't need `poll()` (only sockets and pipes do). So reading the whole file at once (e.g. `std::ifstream` in binary mode) is allowed. Make sure it's binary-safe: an image must arrive byte for byte.
-- [ ] **MIME table:** extension → `Content-Type` (`.html`, `.css`, `.js`, `.png`, `.jpg`, `.gif`, `.ico`, `.txt`; unknown → `application/octet-stream`). Without the right type, the browser won't apply your CSS.
-- [ ] **Trap 4 (path traversal):** `curl --path-as-is localhost:8080/../../etc/passwd`. What does your server send? It must **never** serve a file outside `root`. Decide how you prevent it (reject `..` segments, or resolve the path and check the prefix) and write down why.
-- [ ] **Trap 5 (a file that's too big):** a 1 GB file read into one `std::string`… Fine for now; note the limit as a TODO.
+- [x] Only GET for now. Any other known method → 405 (with an `Allow: GET` header; check what nginx sends). POST/DELETE come with the config job and Week 3.
+- [x] Use `stat()` on the path: does not exist → 404; a directory → `index.html` inside it, or 403 if there's none (autoindex comes later); a regular file → read it and send it with 200; no permission → 403.
+- [x] **Directory without a trailing `/`** (`/sub` instead of `/sub/`): nginx answers 301 to `/sub/`. Why? (Think about relative links inside that page, like `style.css`.) Implement it, or note it as a TODO. Your choice.
+- [x] **Reading the file:** the subject says regular disk files don't need `poll()` (only sockets and pipes do). So reading the whole file at once (e.g. `std::ifstream` in binary mode) is allowed. Make sure it's binary-safe: an image must arrive byte for byte.
+- [x] **MIME table:** extension → `Content-Type` (`.html`, `.css`, `.js`, `.png`, `.jpg`, `.gif`, `.ico`, `.txt`; unknown → `application/octet-stream`). Without the right type, the browser won't apply your CSS.
+- [ ] ← **next** **Trap 4 (path traversal):** `curl --path-as-is localhost:8080/../../etc/passwd`. What does your server send? It must **never** serve a file outside `root`. Decide how you prevent it (reject `..` segments, or resolve the path and check the prefix) and write down why.
+- [x] **Trap 5 (a file that's too big):** a 1 GB file read into one `std::string`… Fine for now; note the limit as a TODO.
 
 Tests:
 ```bash
